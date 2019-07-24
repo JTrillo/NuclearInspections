@@ -30,10 +30,17 @@ class Analyst(threading.Thread):
             acqId = i%100
             if acqId == 0:
                 acqId = 100
+            
+            # Get Acquisition
             acq = self.getAcquisition(acqId)
             time_list.append(acq[0])
+
+            # Analyzing
             if self.DEBUG:
                 print(f"Analyst-{self.analyst_name} --> Analyzing {acq[1]}")
+            time.sleep(random.randint(30, 60)) #ANALYZING
+
+            # Add Analysis
             analysis = self.addAnalysis(i)
             time_list2.append(analysis)
             

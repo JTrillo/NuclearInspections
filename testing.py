@@ -10,8 +10,8 @@ from acquisitor import *
 from analyst import *
 from cleaner import *
 
-#API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
-API_ENDPOINT = "http://35.205.21.76:3000/api/" #5 PEERS NET
+API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
+#API_ENDPOINT = "http://35.205.21.76:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 #RUN SERVER WITH CARD ADMIN BEFORE EXECUTE THIS FUNCTION
@@ -36,7 +36,7 @@ def cleanMultithreading(num_threads, acq, ana, begin=-1, totalDeletes=100):
 
             # Create threads
             for i in range(num_threads):
-                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 1)
+                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, begin+deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 1)
                 threads_acq.append(thread)
 
         # Start threads
@@ -262,7 +262,7 @@ def addAdvancedAnalysisTest(num_analysts, num_acqs):
 
     print("Add Analysis Test Finalized")
 
-cleanMultithreading(10, False, True, 201)
+cleanMultithreading(10, True, False, 1)
 #addTubes(100)
 #addAcquisitionTest(1, 100) #Acquisitors, Acquisitions to do
 #addAnalysisTest(50, 100) #Analysts, Analysis to do

@@ -26,6 +26,10 @@ class Acquisitor(threading.Thread):
     def addMultipleAcquisitions(self):
         time_list = []
         for i in range(self.begin, self.begin+self.times):
+            # Acquiring
+            time.sleep(random.randint(30, 60)) #GETTING DATA
+
+            # Add Acquisition
             elapsedtime = self.addAcquisition(i)
             time_list.append(elapsedtime)
 

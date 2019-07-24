@@ -40,9 +40,13 @@ class AdvancedAnalyst(threading.Thread):
             # Get primary and secondary Analysis
             getAnalysis = self.getAnalysis(acqId)
             time_list2.append(getAnalysis)
+
+            # Analyzing
             if self.DEBUG:
                 print(f"Advanced Analyst-{self.analyst_name} --> Analyzing {acq[1]}")
-            
+            time.sleep(random.randint(30, 60)) #ANALYZING
+
+
             # Add resolution Analysis
             analysis = self.addAnalysis(i)
             time_list3.append(analysis)
