@@ -37,7 +37,7 @@ class AdvancedAnalyst(threading.Thread):
             acq = self.getAcquisition(acqId)
             time_list.append(acq[0])
 
-            # Get primary and secondary Analysis
+            # Get automatic, primary & secondary Analysis
             getAnalysis = self.getAnalysis(acqId)
             time_list2.append(getAnalysis)
 
@@ -78,17 +78,17 @@ class AdvancedAnalyst(threading.Thread):
         r = requests.get(f"{self.API_ENDPOINT}queries/AnalysisByAcquisition?acq_fqi={acq_fqi}")
         elapsed_time = time.time() - start_time
         if self.DEBUG:
-            print(f"Indications primary analyst --> {r.json()[0]['indications']}")
-            print(f"Indications secondary analyst --> {r.json()[1]['indications']}")
+            print(f"Indications automatic analysis --> {r.json()[0]['indications']")
+            print(f"Indications primary analyst --> {r.json()[1]['indications']}")
+            print(f"Indications secondary analyst --> {r.json()[2]['indications']}")
         return elapsed_time
 
-    # REVISAR A PARTIR DE AQUI
     def addAnalysis(self, anaId):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAnalysis"
         acqId = anaId%100
         if acqId == 0:
             acqId = 100
-        possibleOptions = ["Everything is OK", "Primary analysis is OK", "Secondary analysis is OK"]
+        possibleOptions = ["Everything OK", "Primary OK", "Secondary OK", "Automatic OK", "Primary & Secondary OK", "Primary & Automatic OK", "Secondary & Automatic OK"]
         data = {
             "analysisId": anaId,
             "method": "MANUAL",

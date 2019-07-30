@@ -5,6 +5,9 @@ import time
 import requests
 import json
 import random
+from firebase_admin import credentials
+from firebase_admin import storage
+import hashlib
 
 class Analyst(threading.Thread):
 
@@ -35,13 +38,19 @@ class Analyst(threading.Thread):
             acq = self.getAcquisition(acqId)
             time_list.append(acq[0])
 
+            # Get acquisition file
+            self.downloadFile(acq[1])
+
+            # Get tube info
+            tube_length = self.getTube()
+
             # Analyzing
             if self.DEBUG:
                 print(f"Analyst-{self.analyst_name} --> Analyzing {acq[1]}")
             time.sleep(random.randint(30, 60)) #ANALYZING
 
             # Add Analysis
-            analysis = self.addAnalysis(i)
+            analysis = self.addAnalysis(i, tube_length)
             time_list2.append(analysis)
             
         self.min_get = min(time_list)
@@ -59,9 +68,16 @@ class Analyst(threading.Thread):
         elapsed_time = time.time() - start_time
         if self.DEBUG:
             print(r.json()['filename'])
-        return (elapsed_time, r.json()['filename'])
+        return (elapsed_time, r.json()['filename'], r.json()['tube'])
 
-    def addAnalysis(self, anaId):
+    def getTube(self, tubeId):
+        #start_time = time.time()
+        r = requests.get(f"{self.API_ENDPOINT}{self.NS}.Tube/{tubeId}")
+        #elapsed_time = time.time() - start_time
+        tubeData = r.json()
+        return tubeData['length']
+
+    def addAnalysis(self, anaId, tubePosX, tubePosY):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAnalysis"
         acqId = anaId%100
         if acqId == 0:
@@ -70,7 +86,7 @@ class Analyst(threading.Thread):
             "analysisId": anaId,
             "method": "MANUAL",
             "acqId": acqId,
-            "indications": []
+            "indications": self.generateIndications(tubePosX, tubePosY)
         }
         start_time = time.time()
         r = requests.post(resource_url, data=data)
@@ -89,3 +105,40 @@ class Analyst(threading.Thread):
         print(f"{self.analyst_name} - Fastest analysis added in {self.min_add} seconds")
         print(f"{self.analyst_name} - Slowest analysis added in {self.max_add} seconds")
         print(f"{self.analyst_name} - Average time adding analysis: {self.avg_add} seconds")
+
+    def downloadFile(self, filename):
+        cred = credentials.Certificate("serviceAccountKey.json")
+        firebase_admin.initialize_app(cred)
+
+        bucket = storage.bucket("hyperledger-jte.appspot.com")
+
+        tfm = bucket.get_blob(filename)
+        aux = tfm.download_as_string().decode('ascii').split('\r\n')
+        aux.remove('')
+
+        if self.DEBUG:
+            print(aux, len(aux))
+    
+    def generateIndications(self, tubeLength):
+        n_ind = random.randint(0, 4)
+
+        indications = []
+        for i in range(n_ind):
+            indication = "Detected "
+            ind_type = random.randint(0, 2)
+            if ind_type == 0:
+                indication += "fissure" # Grieta
+            elif ind_type == 1:
+                indication += "break" # Rotura
+            elif ind_type == 2:
+                indication += "dent" # Abolladura
+
+            # Random position
+            pos = random.random() * tubeLength
+
+            indication += f", position {pos}"
+
+            # Add indication
+            indications.append(indication)
+
+        return indications
