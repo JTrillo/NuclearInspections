@@ -10,8 +10,8 @@ from acquisitor import *
 from analyst import *
 from cleaner import *
 
-#API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
-API_ENDPOINT = "http://35.241.187.202:3000/api/" #5 PEERS NET
+API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
+#API_ENDPOINT = "http://35.241.187.202:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 #RUN SERVER WITH CARD ADMIN BEFORE EXECUTE THIS FUNCTION
@@ -262,9 +262,9 @@ def addAdvancedAnalysisTest(num_analysts, num_acqs):
 
     print("Add Analysis Test Finalized")
 
-cleanMultithreading(10, False, True, 201)
+#cleanMultithreading(10, True, True, 1)
 #addTubes(100)
-#addAcquisitionTest(1, 100) #Acquisitors, Acquisitions to do
+addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
 #addAnalysisTest(10, 100) #Analysts, Analysis to do
 #addAdvancedAnalysisTest(1, 100)
 

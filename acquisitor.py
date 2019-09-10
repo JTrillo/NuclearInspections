@@ -5,6 +5,7 @@ import time
 import requests
 import json
 import random
+import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
@@ -29,13 +30,17 @@ class Acquisitor(threading.Thread):
 
     def addMultipleAcquisitions(self):
         time_list = []
+
+        cred = credentials.Certificate("serviceAccountKey.json")
+        firebase_admin.initialize_app(cred)
+
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
             time.sleep(random.randint(30, 60)) #GETTING DATA
 
             # Generating file
-            filename = f"acq{i}.txt"
-            self.generateFile(filename)
+            filename = self.generateFilename(i)
+            acq_data = self.generateFile(filename)
 
             # Calculating hash sha256
             hash_value = self.sha256(filename)
@@ -80,24 +85,36 @@ class Acquisitor(threading.Thread):
         print(f"{self.acq_name} - Slowest acquisition added in {self.max} seconds")
         print(f"{self.acq_name} - Average time adding acquisitions: {self.avg} seconds")
 
+    def generateFilename(self, acqId):
+        if acqId < 10:
+            aux = "00" + str(acqId)
+        elif acqId < 100:
+            aux = "0" + str(acqId)
+        else:
+            aux = str(acqId)
+        
+        return f"acq{aux}.txt"
+
     def generateFile(self, filename):
         start_time = time.time()
         f = open(filename, "w")
 
         content = []
-        for i in range(0, 200000):
+        n = 170000
+        for i in range(0, n):
             aux = random.randint(-5000, 5000)
             content.append(aux)
-            f.write(str(aux) + "\n")
+            if i == n-1:
+                f.write(str(aux))
+            else:
+                f.write(str(aux) + "\n")
 
         f.close()
         elapsed_time = time.time() - start_time
-        print(f"Elapsed time generating file: {elapsed_time}")
+        if self.DEBUG:
+            print(f"Elapsed time generating file: {elapsed_time}")
 
-    def uploadFile(self, filename)
-        cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(cred)
-
+    def uploadFile(self, filename):
         bucket = storage.bucket("hyperledger-jte.appspot.com")
 
         tfm = bucket.blob(filename)

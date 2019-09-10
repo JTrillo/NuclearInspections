@@ -5,6 +5,7 @@ import time
 import requests
 import json
 import random
+import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
@@ -41,8 +42,11 @@ class Analyst(threading.Thread):
             # Get acquisition file
             self.downloadFile(acq[1])
 
+            # Check hash value
+            file_valid = self.checkHash(acq[1], acq[2])
+
             # Get tube info
-            tube_length = self.getTube()
+            tube_length = self.getTube(acq[3])
 
             # Analyzing
             if self.DEBUG:
@@ -52,6 +56,9 @@ class Analyst(threading.Thread):
             # Add Analysis
             analysis = self.addAnalysis(i, tube_length)
             time_list2.append(analysis)
+
+            # Delete local file
+            self.deleteLocalFile(filename)
             
         self.min_get = min(time_list)
         self.avg_get = sum(time_list)/self.times
@@ -68,7 +75,7 @@ class Analyst(threading.Thread):
         elapsed_time = time.time() - start_time
         if self.DEBUG:
             print(r.json()['filename'])
-        return (elapsed_time, r.json()['filename'], r.json()['tube'])
+        return (elapsed_time, r.json()['filename'], r.json()['hash'], r.json()['tube'])
 
     def getTube(self, tubeId):
         #start_time = time.time()
@@ -112,12 +119,23 @@ class Analyst(threading.Thread):
 
         bucket = storage.bucket("hyperledger-jte.appspot.com")
 
-        tfm = bucket.get_blob(filename)
-        aux = tfm.download_as_string().decode('ascii').split('\r\n')
+        blob = bucket.get_blob(filename)
+        '''aux = blob.download_as_string().decode('ascii').split('\r\n')
         aux.remove('')
-
         if self.DEBUG:
-            print(aux, len(aux))
+            print(aux, len(aux))'''
+        aux.download_to_filename(filename)
+
+    def checkHash(self, filename, hashStored):
+        hashValue = self.sha256(filename)
+        return hashValue == hashStored
+
+    def sha256(self, fname):
+        hash_sha256 = hashlib.sha256()
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
     
     def generateIndications(self, tubeLength):
         n_ind = random.randint(0, 4)
@@ -142,3 +160,9 @@ class Analyst(threading.Thread):
             indications.append(indication)
 
         return indications
+    
+    def deleteLocalFile(self, filename):
+        if(os.path.exists(filename)):
+            os.remove(filename)
+        else:
+            print(f"File {filename} does not exist")

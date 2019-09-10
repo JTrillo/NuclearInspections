@@ -36,10 +36,20 @@ def download():
 
     bucket = storage.bucket("hyperledger-jte.appspot.com")
 
-    tfm = bucket.get_blob('acq1.txt')
-    aux = tfm.download_as_string().decode('ascii').split('\r\n')
-    aux.remove('')
-    print(aux, len(aux))
+    blob = bucket.get_blob('acq1.txt')
+    aux = blob.download_to_filename('acq1.txt')
+
+def getContent(filename):
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+
+    bucket = storage.bucket("hyperledger-jte.appspot.com")
+
+    blob = bucket.get_blob(filename)
+    aux = blob.download_as_string().decode('ascii').split('\r\n')
+    content = [int(value) for value in aux]
+    #print(content, len(content))
+    return content
 
 def sha256(fname):
     hash_sha256 = hashlib.sha256()
@@ -74,5 +84,6 @@ def generateIndications(tubeLength):
 
 #upload()
 #download()
+# content = getContent('acq001.txt')
 #print(sha256("acq1.txt"))
 #print(generateIndications(10))
