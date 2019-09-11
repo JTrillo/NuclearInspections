@@ -120,11 +120,7 @@ class Analyst(threading.Thread):
         bucket = storage.bucket("hyperledger-jte.appspot.com")
 
         blob = bucket.get_blob(filename)
-        '''aux = blob.download_as_string().decode('ascii').split('\r\n')
-        aux.remove('')
-        if self.DEBUG:
-            print(aux, len(aux))'''
-        aux.download_to_filename(filename)
+        blob.download_to_filename(filename)
 
     def checkHash(self, filename, hashStored):
         hashValue = self.sha256(filename)
