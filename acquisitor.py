@@ -36,7 +36,7 @@ class Acquisitor(threading.Thread):
 
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
-            time.sleep(random.randint(30, 60)) #GETTING DATA
+            #time.sleep(random.randint(30, 60)) #GETTING DATA
 
             # Generating file
             filename = self.generateFilename(i)
@@ -100,7 +100,7 @@ class Acquisitor(threading.Thread):
         f = open(filename, "w")
 
         content = []
-        n = 170000
+        n = 100000
         for i in range(0, n):
             aux = random.randint(-5000, 5000)
             content.append(aux)

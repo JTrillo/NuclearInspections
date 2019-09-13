@@ -9,6 +9,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
+import os
 
 class Analyst(threading.Thread):
 
@@ -91,7 +92,6 @@ class Analyst(threading.Thread):
             acqId = 100
         data = {
             "analysisId": anaId,
-            "method": "MANUAL",
             "acqId": acqId,
             "indications": self.generateIndications(tubePosX, tubePosY)
         }

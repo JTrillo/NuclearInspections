@@ -91,7 +91,6 @@ class AdvancedAnalyst(threading.Thread):
         possibleOptions = ["Everything OK", "Primary OK", "Secondary OK", "Automatic OK", "Primary & Secondary OK", "Primary & Automatic OK", "Secondary & Automatic OK"]
         data = {
             "analysisId": anaId,
-            "method": "MANUAL",
             "acqId": acqId,
             "indications": []
         }
