@@ -25,12 +25,16 @@ class Analyst(threading.Thread):
 
     def run(self):
         print(f"Analyst {self.analyst_name} has started")
-        results = self.addMultipleAnalysis()
+        self.addMultipleAnalysis()
         print(f"Analyst {self.analyst_name} has finished")
 
     def addMultipleAnalysis(self):
         time_list = []
         time_list2 = []
+
+        cred = credentials.Certificate("serviceAccountKey.json")
+        firebase_admin.initialize_app(cred)
+
         for i in range(self.begin, self.begin+self.times):
             acqId = i%100
             if acqId == 0:
@@ -40,26 +44,34 @@ class Analyst(threading.Thread):
             acq = self.getAcquisition(acqId)
             time_list.append(acq[0])
 
+            # Get Filename, hash value stored and tube id
+            filename = acq[1]
+            hash_stored = acq[2]
+            tube_id = acq[3]
+
             # Get acquisition file
-            self.downloadFile(acq[1])
+            self.downloadFileFromRepository(filename)
 
             # Check hash value
-            file_valid = self.checkHash(acq[1], acq[2])
+            file_valid = self.checkHashSHA256(filename, hash_stored)
 
-            # Get tube info
-            tube_length = self.getTube(acq[3])
+            if file_valid:
+                # Get tube length
+                tube_length = self.getTubeLength(tube_id)
 
-            # Analyzing
-            if self.DEBUG:
-                print(f"Analyst-{self.analyst_name} --> Analyzing {acq[1]}")
-            time.sleep(random.randint(30, 60)) #ANALYZING
+                # Analyzing
+                if self.DEBUG:
+                    print(f"Analyst-{self.analyst_name} --> Analyzing {filename}")
+                time.sleep(random.randint(30, 60)) #ANALYZING
 
-            # Add Analysis
-            analysis = self.addAnalysis(i, tube_length)
-            time_list2.append(analysis)
+                # Add Analysis
+                analysis = self.addAnalysis(i, tube_length)
+                time_list2.append(analysis)
 
-            # Delete local file
-            self.deleteLocalFile(filename)
+                # Delete local file
+                self.deleteLocalFile(filename)
+            else:
+                self.times = self.times - 1
             
         self.min_get = min(time_list)
         self.avg_get = sum(time_list)/self.times
@@ -78,14 +90,31 @@ class Analyst(threading.Thread):
             print(r.json()['filename'])
         return (elapsed_time, r.json()['filename'], r.json()['hash'], r.json()['tube'])
 
-    def getTube(self, tubeId):
+    def downloadFileFromRepository(self, filename):
+        bucket = storage.bucket("hyperledger-jte.appspot.com")
+
+        blob = bucket.get_blob(filename)
+        blob.download_to_filename(filename)
+
+    def checkHashSHA256(self, filename, hashStored):
+        hashValue = self.sha256(filename)
+        return hashValue == hashStored
+
+    def sha256(self, fname):
+        hash_sha256 = hashlib.sha256()
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_sha256.update(chunk)
+        return hash_sha256.hexdigest()
+
+    def getTubeLength(self, tubeId):
         #start_time = time.time()
         r = requests.get(f"{self.API_ENDPOINT}{self.NS}.Tube/{tubeId}")
         #elapsed_time = time.time() - start_time
         tubeData = r.json()
         return tubeData['length']
 
-    def addAnalysis(self, anaId, tubePosX, tubePosY):
+    def addAnalysis(self, anaId, tubeLength):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAnalysis"
         acqId = anaId%100
         if acqId == 0:
@@ -93,7 +122,7 @@ class Analyst(threading.Thread):
         data = {
             "analysisId": anaId,
             "acqId": acqId,
-            "indications": self.generateIndications(tubePosX, tubePosY)
+            "indications": self.generateIndications(tubeLength)
         }
         start_time = time.time()
         r = requests.post(resource_url, data=data)
@@ -112,26 +141,6 @@ class Analyst(threading.Thread):
         print(f"{self.analyst_name} - Fastest analysis added in {self.min_add} seconds")
         print(f"{self.analyst_name} - Slowest analysis added in {self.max_add} seconds")
         print(f"{self.analyst_name} - Average time adding analysis: {self.avg_add} seconds")
-
-    def downloadFile(self, filename):
-        cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(cred)
-
-        bucket = storage.bucket("hyperledger-jte.appspot.com")
-
-        blob = bucket.get_blob(filename)
-        blob.download_to_filename(filename)
-
-    def checkHash(self, filename, hashStored):
-        hashValue = self.sha256(filename)
-        return hashValue == hashStored
-
-    def sha256(self, fname):
-        hash_sha256 = hashlib.sha256()
-        with open(fname, "rb") as f:
-            for chunk in iter(lambda: f.read(4096), b""):
-                hash_sha256.update(chunk)
-        return hash_sha256.hexdigest()
     
     def generateIndications(self, tubeLength):
         n_ind = random.randint(0, 4)
