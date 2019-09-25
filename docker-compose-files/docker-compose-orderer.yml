@@ -1,0 +1,18 @@
+version: '2'
+
+networks:
+    nuclear:
+
+services:
+
+    orderer.example.com:
+        extends:
+            file: docker-compose-base.yml
+            service: orderer
+        container_name: orderer.example.com
+        extra_hosts:
+            - "peer0.org1.example.com:IP_ORG1"
+            - "peer0.org2.example.com:IP_ORG2"
+            - "peer0.org3.example.com:IP_ORG3"
+        networks:
+            - nuclear

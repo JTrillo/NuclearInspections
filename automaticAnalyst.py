@@ -11,17 +11,18 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 
-API_ENDPOINT = "http://104.155.2.231:3001/api/" #2 PEERS NET
-WS_ENPOINT = "ws://104.155.2.231:3001/api/" #2 PEERS NET
-#API_ENDPOINT = "http://35.241.187.202:3001/api/" #5 PEERS NET
-#WS_ENDPOINT = "ws://35.241.187.202:3001/api/" #5 PEERS NET
+#API_ENDPOINT = "http://104.155.2.231:3001/api/" #2 PEERS NET
+#WS_ENDPOINT = "ws://104.155.2.231:3000/api/" #2 PEERS NET
+API_ENDPOINT = "http://34.76.209.105:3001/api/" #5 PEERS NET
+WS_ENDPOINT = "ws://34.76.209.105:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 async def eventListener():
-    print("Event listener started...\r\n")
+    print("EVENT LISTENER STARTED")
     cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
-    async with websockets.connect(WS_ENPOINT) as websocket:
+    async with websockets.connect(WS_ENDPOINT) as websocket:
+        print("Waiting for new event...")
         while True:
             aux = await websocket.recv()
             print("NEW EVENT")
@@ -39,31 +40,32 @@ async def eventListener():
             time.sleep(10)
 
             #Download file from repository
-            downloadFile(filename)
+            downloadFileFromRepository(filename)
 
             #Compare downloaded file hash value with stored hash value
-            if checkHash(filename, hash_value):
+            if checkHashSHA256(filename, hash_value):
                 print("Valid hash")
+
+                #Get file content
+                acqData = getFileContent(filename)
+
+                #Delete local file
+                deleteLocalFile(filename)
+
+                #Send transaction
+                elapsed_time = addAutomaticAnalysis(acqId, acqData)
+                print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
             else:
-                print("Not valid hash")
+                print("Not valid hash\r\n")
 
-            #Get file content
-            acqData = getFileContent(filename)
 
-            #Delete local file
-            deleteLocalFile(filename)
-
-            #Send transaction
-            elapsed_time = addAutomaticAnalysis(acqId, acqData)
-            print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
-
-def downloadFile(filename):
+def downloadFileFromRepository(filename):
     bucket = storage.bucket("hyperledger-jte.appspot.com")
 
     blob = bucket.get_blob(filename)
     blob.download_to_filename(filename)
 
-def checkHash(filename, hashStored):
+def checkHashSHA256(filename, hashStored):
     hashValue = sha256(filename)
     return hashValue == hashStored
 
