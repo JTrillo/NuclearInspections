@@ -38,10 +38,14 @@ services:
             - /var/run/:/host/var/run/
             - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/:/etc/hyperledger/fabric/msp
             - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/:/etc/hyperledger/fabric/tls
+            - ./crypto-config/peerOrganizations/org1.example.com/users/:/etc/hyperledger/users
         extra_hosts:
             - "orderer.example.com:IP_ORDERER"
             - "peer0.org2.example.com:IP_ORG2"
             - "peer0.org3.example.com:IP_ORG3"
+            # UNCOMMENT FOR 5 ORGS NETWORK
+            #- "peer0.org4.example.com:IP_ORG4"
+            #- "peer0.org5.example.com:IP_ORG5"
         networks:
             - nuclear
 

@@ -10,7 +10,7 @@ services:
             - ORDERER_GENERAL_GENESISMETHOD=file
             - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/configtx/genesis.block
             - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-            - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/msp/orderer/msp
+            - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
             #TLS config
             - ORDERER_GENERAL_TLS_ENABLED=false
             - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
@@ -44,6 +44,8 @@ services:
             - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
         command: peer node start
+        volumes:
+            - ./channel-artifacts/:/etc/hyperledger/configtx
 
     couchdb:
         image: hyperledger/fabric-couchdb
