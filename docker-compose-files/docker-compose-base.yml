@@ -46,6 +46,9 @@ services:
         command: peer node start
         volumes:
             - ./channel-artifacts/:/etc/hyperledger/configtx
+        ports:
+            - 7051:7051
+            - 7053:7053
 
     couchdb:
         image: hyperledger/fabric-couchdb
