@@ -33,7 +33,7 @@ Orderer machine
 #!/bin/bash
 
 set -ev
-docker-compose -f docker-compose-orderer.yml down
+docker-compose -f docker-compose-orderer.yml down -v
 docker-compose -f docker-compose-orderer.yml up -d
 ```
 Orgs machines
@@ -41,7 +41,7 @@ Orgs machines
 #!/bin/bash
 
 set -ev
-docker-compose -f docker-compose-orgn.yml down
+docker-compose -f docker-compose-orgn.yml down -v
 docker-compose -f docker-compose-orgn.yml up -d
 ```
 
@@ -123,33 +123,42 @@ docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.exampl
 ### 5. Install business network in all nodes
 
 #### 5.1. Edit *connectionProfile.json*
+In Orderer machine
+```
+mkdir -p /tmp/composer/org1
+mkdir /tmp/composer/org2
+mkdir /tmp/composer/org3
+cp ~/NuclearInspections/connectionProfile.json /tmp/composer
+```
 * Replace all instances of the text **INSERT_ORDERER_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORDERER_CA_CERT** with the Orderer CA certificate. Use the following command to get the certificate from the .pem file:
 
 ```
-awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt > /tmp/composer/ca-orderer.txt
+awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-samples/first-network/crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt > /tmp/composer/ca-orderer.txt
 ```
 * Replace all instances of the text **INSERT_ORG1_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORG1_CA_CERT** with the Org1 CA certificate. Use the following command to get the certificate from the .pem file:
 
 ```
-awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt > /tmp/composer/org1/ca-org1.txt
+awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt > /tmp/composer/org1/ca-org1.txt
 ```
 * Replace all instances of the text **INSERT_ORG2_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORG2_CA_CERT** with the Org2 CA certificate. Use the following command to get the certificate from the .pem file:
 
 ```
-awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt > /tmp/composer/org2/ca-org2.txt
+awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt > /tmp/composer/org2/ca-org2.txt
 ```
 * Replace all instances of the text **INSERT_ORG3_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORG3_CA_CERT** with the Org3 CA certificate. Use the following command to get the certificate from the .pem file:
 
 ```
-awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt > /tmp/composer/org3/ca-org3.txt
+awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-samples/first-network/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls/ca.crt > /tmp/composer/org3/ca-org3.txt
 ```
 
 #### 5.2. Customizing the connection profile for each organization
 Next code must be placed between ***version*** and ***channel*** section of connection profile archive. You have to change the name of the organization for eache one.
+
+In Orderer machine
 ```
 "client": {
     "organization": "OrgN",
@@ -168,16 +177,45 @@ Next code must be placed between ***version*** and ***channel*** section of conn
 
 #### 5.3. Copy public and private key of admins
 You must copy in the temporal folder the public and the private key of each organization admin.
+
+In Orderer machine for Org1
 ```
 # Public Key
-cp -p crypto-config/peerOrganizations/orgn.example.com/users/Admin@orgn.example.com/msp/signcerts/A*.pem /tmp/composer/orgn
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/A*.pem /tmp/composer/org1
 # Private Key
-cp -p crypto-config/peerOrganizations/orgn.example.com/users/Admin@orgn.example.com/msp/keystore/*_sk /tmp/composer/orgn
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk /tmp/composer/org1
+```
+
+In Orderer machine for Org2
+```
+# Public Key
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/A*.pem /tmp/composer/org2
+# Private Key
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk /tmp/composer/org2
+```
+
+In Orderer machine for Org3
+```
+# Public Key
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp/signcerts/A*.pem /tmp/composer/org3
+# Private Key
+cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp/keystore/*_sk /tmp/composer/org3
 ```
 
 #### 5.4. Create Peer Admin cards for each organization
+In Orderer machine for Org1
 ```
-composer card create -p /tmp/composer/orgn/connectionProfile.json -u PeerAdmin -c /tmp/composer/orgn/A*.pem -k /tmp/composer/orgn/*_sk -r PeerAdmin -r ChannelAdmin -f /tmp/composer/orgn/PeerAdmin@nuclear-orgn.card
+composer card create -p /tmp/composer/org1/connectionProfile.json -u PeerAdmin -c /tmp/composer/org1/A*.pem -k /tmp/composer/org1/*_sk -r PeerAdmin -r ChannelAdmin -f /tmp/composer/org1/PeerAdmin@nuclear-org1.card
+```
+
+In Orderer machine for Org2
+```
+composer card create -p /tmp/composer/org2/connectionProfile.json -u PeerAdmin -c /tmp/composer/org2/A*.pem -k /tmp/composer/org2/*_sk -r PeerAdmin -r ChannelAdmin -f /tmp/composer/org2/PeerAdmin@nuclear-org2.card
+```
+
+In Orderer machine for Org3
+```
+composer card create -p /tmp/composer/org3/connectionProfile.json -u PeerAdmin -c /tmp/composer/org3/A*.pem -k /tmp/composer/org3/*_sk -r PeerAdmin -r ChannelAdmin -f /tmp/composer/org3/PeerAdmin@nuclear-org3.card
 ```
 
 #### 5.5. Send cards to org machines
@@ -197,16 +235,26 @@ gcloud compute scp /tmp/composer/org3/PeerAdmin@nuclear-org3.card jokinator20@th
 ```
 
 #### 5.6. Import the business network cards
+On Org1 machine
 ```
-composer card import -f PeerAdmin@nuclear-orgn.card --card PeerAdmin@nuclear-orgn
+composer card import -f ~/PeerAdmin@nuclear-org1.card --card PeerAdmin@nuclear-org1
 ```
 
+On Org2 machine
+```
+composer card import -f ~/PeerAdmin@nuclear-org2.card --card PeerAdmin@nuclear-org2
+```
+
+On Org3 machine
+```
+composer card import -f ~/PeerAdmin@nuclear-org3.card --card PeerAdmin@nuclear-org3
+```
 #### 5.7. Create the business network archive and install it
 For all Orgs machines
 ```
 cd
-git clone https://github.com/JTrillo/HyperledgerComposer.git
 mkdir /tmp/composer
+git clone https://github.com/JTrillo/HyperledgerComposer.git ~/HyperledgerComposer
 composer archive create -t dir -n ~/HyperledgerComposer/nuclear_auto -a /tmp/composer/archive.bna
 ```
 
@@ -296,4 +344,33 @@ Org 1 machine
 composer network start -c PeerAdmin@nuclear-org1 -n nuclear_auto -V 0.0.1 -o endorsementPolicyFile=/tmp/composer/endorsement-policy.json -A admin-org1 -C /tmp/composer/org1/admin-pub.pem -A admin-org2 -C /tmp/composer/org2/admin-pub.pem -A admin-org3 -C /tmp/composer/org3/admin-pub.pem
 ```
 
-#### 7.3.  
+#### 7.3. Import Business Network Admin Cards
+Orderer machine
+```
+gcloud compute scp /tmp/composer/org1/connectionProfile.json jokinator20@threenet-1:/tmp/composer/org1/
+gcloud compute scp /tmp/composer/org2/connectionProfile.json jokinator20@threenet-2:/tmp/composer/org2/
+gcloud compute scp /tmp/composer/org3/connectionProfile.json jokinator20@threenet-3:/tmp/composer/org3/
+```
+
+Org 1 machine
+```
+composer card create -p /tmp/composer/org1/connectionProfile.json -u admin-org1 -n nuclear_auto -c /tmp/composer/org1/admin-pub.pem -k /tmp/composer/org1/admin-priv.pem -f /tmp/composer/org1/admin-org1@nuclear_auto
+composer card import -f /tmp/composer/org1/admin-org1@nuclear_auto.card -c admin-org1@nuclear_auto
+composer network ping -c admin-org1@nuclear_auto
+```
+
+Org 2 machine
+```
+composer card create -p /tmp/composer/org2/connectionProfile.json -u admin-org2 -n nuclear_auto -c /tmp/composer/org2/admin-pub.pem -k /tmp/composer/org2/admin-priv.pem -f /tmp/composer/org2/admin-org2@nuclear_auto
+composer card import -f /tmp/composer/org2/admin-org2@nuclear_auto.card -c admin-org2@nuclear_auto
+composer network ping -c admin-org2@nuclear_auto
+```
+
+Org 3 machine
+```
+composer card create -p /tmp/composer/org3/connectionProfile.json -u admin-org3 -n nuclear_auto -c /tmp/composer/org3/admin-pub.pem -k /tmp/composer/org3/admin-priv.pem -f /tmp/composer/org3/admin-org3@nuclear_auto
+composer card import -f /tmp/composer/org3/admin-org3@nuclear_auto.card -c admin-org3@nuclear_auto
+composer network ping -c admin-org3@nuclear_auto
+```
+
+### 8. Interact with the deployed business network

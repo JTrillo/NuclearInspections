@@ -10,7 +10,8 @@ from acquisitor import *
 from analyst import *
 from cleaner import *
 
-API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
+#API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
+API_ENDPOINT = "http://35.195.161.115:3000/api/" #3 PEERS NET
 #API_ENDPOINT = "http://35.241.187.202:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
@@ -89,6 +90,34 @@ def addTubes(n_tubes):
             print(f"Added tube {i}")
         else:
             print(f"Error when adding tube {i}")
+
+def workAndCalibration():
+    #Create work 1
+    resource_url = f"{API_ENDPOINT}{NS}.CreateWork"
+    data = {
+        "workId": "1",
+        "description": "Testing"
+    }
+    r = requests.post(resource_url, data=data)
+    if r.status_code == requests.codes.ok:
+        print(f"Work 1 created")
+    else:
+        print(f"Error when creating work 1")
+
+    #Add calibration 1
+    resource_url = f"{API_ENDPOINT}{NS}.AddCalibration"
+    data = {
+        "calId": "1",
+        "equipment": "DRONE",
+        "workId": "1"
+    }
+    r = requests.post(resource_url, data=data)
+    if r.status_code == requests.codes.ok:
+        print("Added calibration 1")
+    else:
+        print("Error when adding calibration 1")
+
+    
 
 def addAcquisitionTest(num_acquisitors, num_tubes):
     acquisitor_threads = []
@@ -264,7 +293,8 @@ def addAdvancedAnalysisTest(num_analysts, num_acqs):
 
 #cleanMultithreading(10, True, True, 1)
 #addTubes(100)
-addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
+workAndCalibration()
+#addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
 #addAnalysisTest(10, 100) #Analysts, Analysis to do
 #addAdvancedAnalysisTest(1, 100)
 

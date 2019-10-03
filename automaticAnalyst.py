@@ -13,28 +13,35 @@ from firebase_admin import storage
 
 #API_ENDPOINT = "http://104.155.2.231:3001/api/" #2 PEERS NET
 #WS_ENDPOINT = "ws://104.155.2.231:3000/api/" #2 PEERS NET
-API_ENDPOINT = "http://34.76.209.105:3001/api/" #5 PEERS NET
-WS_ENDPOINT = "ws://34.76.209.105:3000/api/" #5 PEERS NET
+API_ENDPOINT = "http://35.195.161.115:3001/api/"
+WS_ENDPOINT = "ws://35.195.161.115:3000/api/"
+#API_ENDPOINT = "http://34.76.209.105:3001/api/" #5 PEERS NET
+#WS_ENDPOINT = "ws://34.76.209.105:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
-async def eventListener():
+async def eventListener(DEBUG=False):
     print("EVENT LISTENER STARTED")
     cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
     async with websockets.connect(WS_ENDPOINT) as websocket:
-        print("Waiting for new event...")
-        while True:
+        if DEBUG:
+            print("Waiting for new event...")
+        cont = 0
+        time_list = []
+        while cont<100:
             aux = await websocket.recv()
-            print("NEW EVENT")
+            if DEBUG:
+                print("NEW EVENT")
             aux2 = json.loads(aux)
             eventId = aux2['eventId']
             acqId = aux2['acqId']
             filename = aux2['filename']
             hash_value = aux2['hash']
-            print(f"Event ID: {eventId}")
-            print(f"Acquisition ID: {acqId}")
-            print(f"Filename: {filename}")
-            print(f"Hash value: {hash_value}")
+            if DEBUG:
+                print(f"Event ID: {eventId}")
+                print(f"Acquisition ID: {acqId}")
+                print(f"Filename: {filename}")
+                print(f"Hash value: {hash_value}")
 
             #Waiting a little bit for file upload to repository by acquisitor process
             time.sleep(10)
@@ -44,7 +51,8 @@ async def eventListener():
 
             #Compare downloaded file hash value with stored hash value
             if checkHashSHA256(filename, hash_value):
-                print("Valid hash")
+                if DEBUG:
+                    print("Valid hash")
 
                 #Get file content
                 acqData = getFileContent(filename)
@@ -54,9 +62,19 @@ async def eventListener():
 
                 #Send transaction
                 elapsed_time = addAutomaticAnalysis(acqId, acqData)
-                print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
+                time_list.append(elapsed_time)
+                if DEBUG:
+                    print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
             else:
-                print("Not valid hash\r\n")
+                if DEBUG:
+                    print("Not valid hash\r\n")
+            cont = cont+1
+        minimum = min(time_list)
+        average = sum(time_list)/len(time_list)
+        maximum = max(time_list)
+        print(f"Fastest automatic analysis: {minimum}")
+        print(f"Average time while executing automatic analysis: {average}")
+        print(f"Slowest automatic analysis: {maximum}")
 
 
 def downloadFileFromRepository(filename):
@@ -106,4 +124,4 @@ def addAutomaticAnalysis(acqId, acqData, DEBUG=False):
         print(r.json())
     return elapsed_time
 
-asyncio.get_event_loop().run_until_complete(eventListener())
+asyncio.get_event_loop().run_until_complete(eventListener(True))
