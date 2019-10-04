@@ -293,8 +293,8 @@ def addAdvancedAnalysisTest(num_analysts, num_acqs):
 
 #cleanMultithreading(10, True, True, 1)
 #addTubes(100)
-workAndCalibration()
-#addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
+#workAndCalibration()
+addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
 #addAnalysisTest(10, 100) #Analysts, Analysis to do
 #addAdvancedAnalysisTest(1, 100)
 

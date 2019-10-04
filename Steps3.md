@@ -374,3 +374,50 @@ composer network ping -c admin-org3@nuclear_auto
 ```
 
 ### 8. Interact with the deployed business network
+You can interact with the business network through the REST Server, Composer CLI or Playground.
+
+### 9. Upgrade the business network
+
+#### 9.1. Modifiy package.json
+All Org machines
+```
+# Modify section 'version' of this file. This section must match with the new version number of the business network.
+~/HyperledgerComposer/nuclear_auto/package.json
+```
+
+#### 9.2. Create a new Business Network archive and install it
+For all Orgs machines
+```
+composer archive create -t dir -n ~/HyperledgerComposer/nuclear_auto -a /tmp/composer/archive.bna
+```
+
+For Org1 machine
+```
+composer network install -a /tmp/composer/archive.bna -c PeerAdmin@nuclear-org1
+```
+
+For Org2 machine
+```
+composer network install -a /tmp/composer/archive.bna -c PeerAdmin@nuclear-org2
+```
+
+For Org3 machine
+```
+composer network install -a /tmp/composer/archive.bna -c PeerAdmin@nuclear-org3
+```
+
+### 9.3 Upgrade the network
+Org1 machine
+```
+composer network upgrade -c PeerAdmin@nuclear-org1 -n nuclear_auto -V NETWORK-VERSION
+```
+
+Org2 machine
+```
+composer network upgrade -c PeerAdmin@nuclear-org2 -n nuclear_auto -V NETWORK-VERSION
+```
+
+Org3 machine
+```
+composer network upgrade -c PeerAdmin@nuclear-org3 -n nuclear_auto -V NETWORK-VERSION
+```
