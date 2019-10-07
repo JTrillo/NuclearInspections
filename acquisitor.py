@@ -10,6 +10,7 @@ from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
 import os
+import datetime
 
 class Acquisitor(threading.Thread):
 
@@ -36,7 +37,7 @@ class Acquisitor(threading.Thread):
 
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
-            time.sleep(random.randint(30, 60)) #GETTING DATA
+            time.sleep(random.randint(10, 15)) #GETTING DATA
 
             # Generating file
             filename = self.generateFilename(i)
@@ -102,6 +103,7 @@ class Acquisitor(threading.Thread):
             tubeId = 100
         data = {
             "acqId": acqId,
+            "acqDate": self.generateDateTime(),
             "filename": filename,
             "hash": hash_value,
             "calId": "1",
@@ -132,3 +134,9 @@ class Acquisitor(threading.Thread):
         print(f"{self.acq_name} - Fastest acquisition added in {self.min} seconds")
         print(f"{self.acq_name} - Slowest acquisition added in {self.max} seconds")
         print(f"{self.acq_name} - Average time adding acquisitions: {self.avg} seconds")
+    
+    def generateDateTime(self):
+        x = str(datetime.datetime.now()).replace(" ", "T")
+        x2 = x[:len(x)-3]+"Z"
+
+        return x2
