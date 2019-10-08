@@ -1,0 +1,186 @@
+{
+    "name": "hlfv1",
+    "x-type": "hlfv1",
+    "version": "1.0.0",
+    "channels": {
+        "mychannel": {
+            "orderers": [
+                "orderer.example.com"
+            ],
+            "peers": {
+                "peer0.org1.example.com": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "eventSource": true
+                },
+                "peer0.org2.example.com": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "eventSource": true
+                },
+                "peer0.org3.example.com": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "eventSource": true
+                },
+                "peer0.org4.example.com": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "eventSource": true
+                },
+                "peer0.org5.example.com": {
+                    "endorsingPeer": true,
+                    "chaincodeQuery": true,
+                    "eventSource": true
+                }
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org1.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org1.example.com"
+            ]
+        },
+        "Org2": {
+            "mspid": "Org2MSP",
+            "peers": [
+                "peer0.org2.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org2.example.com"
+            ]
+        },
+        "Org3": {
+            "mspid": "Org3MSP",
+            "peers": [
+                "peer0.org3.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org3.example.com"
+            ]
+        },
+        "Org4": {
+            "mspid": "Org4MSP",
+            "peers": [
+                "peer0.org4.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org4.example.com"
+            ]
+        },
+        "Org5": {
+            "mspid": "Org5MSP",
+            "peers": [
+                "peer0.org5.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org5.example.com"
+            ]
+        }
+    },
+    "orderers": {
+        "orderer.example.com": {
+            "url": "grpc://INSERT_IP_ORDERER:7050",
+            "grpcOptions": {
+                "ssl-target-name-override": "orderer.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORDERER_CA_CERT"
+            }
+        }
+    },
+    "peers": {
+        "peer0.org1.example.com": {
+            "url": "grpc://INSERT_ORG1_IP:7051",
+            "eventUrl": "grpc://INSERT_ORG1_IP:7053",
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org1.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORG1_CA_CERT"
+            }
+        },
+        "peer0.org2.example.com": {
+            "url": "grpc://INSERT_ORG2_IP:7051",
+            "eventUrl": "grpc://INSERT_ORG2_IP:7053",
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org2.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORG2_CA_CERT"
+            }
+        },
+        "peer0.org3.example.com": {
+            "url": "grpc://INSERT_ORG3_IP:7051",
+            "eventUrl": "grpc://INSERT_ORG3_IP:7053",
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org3.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORG3_CA_CERT"
+            }
+        },
+        "peer0.org4.example.com": {
+            "url": "grpc://INSERT_ORG4_IP:7051",
+            "eventUrl": "grpc://INSERT_ORG4_IP:7053",
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org4.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORG4_CA_CERT"
+            }
+        },
+        "peer0.org5.example.com": {
+            "url": "grpc://INSERT_ORG5_IP:7051",
+            "eventUrl": "grpc://INSERT_ORG5_IP:7053",
+            "grpcOptions": {
+                "ssl-target-name-override": "peer0.org5.example.com"
+            },
+            "tlsCACerts": {
+                "pem": "INSERT_ORG5_CA_CERT"
+            }
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org1.example.com": {
+            "url": "http://INSERT_ORG1_IP:7054",
+            "caName": "ca-org1",
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.org2.example.com": {
+            "url": "http://INSERT_ORG2_IP:7054",
+            "caName": "ca-org2",
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.org3.example.com": {
+            "url": "http://INSERT_ORG3_IP:7054",
+            "caName": "ca-org3",
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.org4.example.com": {
+            "url": "http://INSERT_ORG4_IP:7054",
+            "caName": "ca-org4",
+            "httpOptions": {
+                "verify": false
+            }
+        },
+        "ca.org5.example.com": {
+            "url": "http://INSERT_ORG5_IP:7054",
+            "caName": "ca-org5",
+            "httpOptions": {
+                "verify": false
+            }
+        }
+    }
+}

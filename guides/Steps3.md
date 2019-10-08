@@ -122,13 +122,13 @@ docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.exampl
 
 ### 5. Install business network in all nodes
 
-#### 5.1. Edit *connectionProfile.json*
+#### 5.1. Edit *connectionProfile-threenet.json*
 In Orderer machine
 ```
 mkdir -p /tmp/composer/org1
 mkdir /tmp/composer/org2
 mkdir /tmp/composer/org3
-cp ~/NuclearInspections/connectionProfile.json /tmp/composer
+cp ~/NuclearInspections/connectionProfile-files/connectionProfile-threenet.json /tmp/composer/connectionProfile.json
 ```
 * Replace all instances of the text **INSERT_ORDERER_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORDERER_CA_CERT** with the Orderer CA certificate. Use the following command to get the certificate from the .pem file:
