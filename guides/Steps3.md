@@ -1,6 +1,21 @@
 # Steps to deploy 3 organizations network
 
-### 1. Change CA's private keys
+### 1. Copy docker-compose files and go to *fabric-samples/first-network* folder
+Each machine needs a docker-compose file to generate the containers. You have to copy the necessary file for each machine from the *NuclearInspections* repository.
+
+On each machine
+```
+# This file is needed in all machines
+cp ~/NuclearInspections/docker-compose-files/docker-compose-base.yml ~/fabric-samples/first-network
+# I.e., machine 3 needs the file docker-compose-org3.yml
+cp ~/NuclearInspections/docker-compose-files/docker-compose-org3.yml ~/fabric-samples/first-network
+# Then go to fabric-samples/first-network folder
+cd ~/fabric-samples/first-network
+```
+
+### 2. Modify docker-compose files
+The docker-compose files need to be modified, including Organization CA private key and IP of the other machines.
+#### 2.1. Change CA's private keys
 
 In files ***docker-compose-org1.yml***, ***docker-compose-org2.yml*** and ***docker-compose-org3.yml*** you have to change the constant **CA*n*_PRIVATE_KEY** for the real private key of each organization certification authority. Those private keys can be found here:
 
@@ -13,7 +28,7 @@ crypto-config/peerOrganizations/org2.example.com/ca/*_sk
 crypto-config/peerOrganizations/org3.example.com/ca/*_sk
 ```
 
-### 2. Change IP adresses
+#### 2.2. Change IP adresses
 
 It necessary to inform other machines' IP addresses in **extra_host** section. Next table shows which files and services must be updated.
 
@@ -79,14 +94,14 @@ docker-compose -f docker-compose-orgn.yml stop
 
 #### 3.4. Grant user execution permission to those scripts
 ```
-chmod u+x scriptFile.sh
+chmod u+x firstTime.sh start.sh stop.sh
 ```
 
 #### 3.5. Create containers and start them
 ```
 ./firstTime.sh
-./start.sh
 ```
+
 ### 4. Setup channel
 
 #### 4.1. Create channel by Org1 Peer Node
@@ -103,26 +118,24 @@ docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org1.exampl
 Org2 Peer Node
 
 ```
+# Fetch channel config
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org2.example.com/msp" peer0.org2.example.com peer channel fetch config -o orderer.example.com:7050 -c mychannel
-```
-
-```
+# Join channel
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org2.example.com/msp" peer0.org2.example.com peer channel join -b mychannel_config.block
 ```
 
 Org3 Peer Node
 
 ```
+# Fetch channel config
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.example.com/msp" peer0.org3.example.com peer channel fetch config -o orderer.example.com:7050 -c mychannel
-```
-
-```
+# Join channel
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.example.com/msp" peer0.org3.example.com peer channel join -b mychannel_config.block
 ```
 
 ### 5. Install business network in all nodes
 
-#### 5.1. Edit *connectionProfile-threenet.json*
+#### 5.1. Edit *connectionProfile.json*
 In Orderer machine
 ```
 mkdir -p /tmp/composer/org1
@@ -156,23 +169,27 @@ awk 'NF {sub(/\r/, ""); printf "%s\\n",$0;}' ~/fabric-samples/first-network/cryp
 ```
 
 #### 5.2. Customizing the connection profile for each organization
-Next code must be placed between ***version*** and ***channel*** section of connection profile archive. You have to change the name of the organization for eache one.
+First of all, you have to copy connectionProfile.json in each org temporal folder
+```
+cp /tmp/composer/connectionProfile.json /tmp/composer/orgn
+```
+Next code must be placed between ***version*** and ***channel*** section of connection profile archive. You have to change the name of the organization for each one.
 
 In Orderer machine
 ```
-"client": {
-    "organization": "OrgN",
-    "connection": {
-        "timeout": {
-            "peer": {
-                "endorser": "300",
-                "eventHub": "300",
-                "eventReg": "300"
-            },
-            "orderer": "300"
+    "client": {
+        "organization": "OrgN",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300",
+                    "eventHub": "300",
+                    "eventReg": "300"
+                },
+                "orderer": "300"
+            }
         }
-    }
-},
+    },
 ```
 
 #### 5.3. Copy public and private key of admins
@@ -219,17 +236,17 @@ composer card create -p /tmp/composer/org3/connectionProfile.json -u PeerAdmin -
 ```
 
 #### 5.5. Send cards to org machines
-Org1 machine
+From Orderer machine to Org1 machine
 ```
 gcloud compute scp /tmp/composer/org1/PeerAdmin@nuclear-org1.card jokinator20@threenet-1:~/
 ```
 
-Org2 machine
+From Orderer machine to Org2 machine
 ```
 gcloud compute scp /tmp/composer/org2/PeerAdmin@nuclear-org2.card jokinator20@threenet-2:~/
 ```
 
-Org3 machine
+From Orderer machine to Org3 machine
 ```
 gcloud compute scp /tmp/composer/org3/PeerAdmin@nuclear-org3.card jokinator20@threenet-3:~/
 ```
@@ -249,10 +266,10 @@ On Org3 machine
 ```
 composer card import -f ~/PeerAdmin@nuclear-org3.card --card PeerAdmin@nuclear-org3
 ```
+
 #### 5.7. Create the business network archive and install it
 For all Orgs machines
 ```
-cd
 mkdir /tmp/composer
 git clone https://github.com/JTrillo/HyperledgerComposer.git ~/HyperledgerComposer
 composer archive create -t dir -n ~/HyperledgerComposer/nuclear_auto -a /tmp/composer/archive.bna
@@ -318,9 +335,9 @@ Create the file ***/tmp/composer/endorsement-policy.json*** with this content (o
 #### 7.1. Retrieve business network admin certificates
 Org 1 machine
 ```
-mkdir -p /tmp/composer/org1
-mkdir -p /tmp/composer/org2
-mkdir -p /tmp/composer/org3
+mkdir /tmp/composer/org1
+mkdir /tmp/composer/org2
+mkdir /tmp/composer/org3
 composer identity request -c PeerAdmin@nuclear-org1 -u admin -s adminpw -d /tmp/composer/org1
 ```
 

@@ -1,6 +1,16 @@
 # Previous steps
 Follow this guide before reading the others. Complete it in **one single machine**.
 
+* Create a machine with these requirements on Google Cloud
+    * Region **europe-west1**
+    * Zone **europe-west1-b**
+    * 1 vCPU
+    * 6,5 GB RAM
+    * OS **Ubuntu 16.04 LTS**
+    * 15 GB Disk
+    * Change Compute Engine access to read and write
+    * Allow HTTP and HTTPS traffic
+
 * Install prerequisites
 ```
 curl -O https://hyperledger.github.io/composer/latest/prereqs-ubuntu.sh
@@ -182,4 +192,10 @@ git clone https://github.com/JTrillo/NuclearInspections.git
 ```
 
 * Shutdown machine and make and make a snapshot
-* Create other machines from this snapshot
+* Create other machines from this snapshot and this requirements:
+    * Region **europe-west1**
+    * Zone **europe-west1-b**
+    * 1 vCPU
+    * 6,5 GB RAM
+    * Change Compute Engine access to read and write
+    * Allow HTTP and HTTPS traffic
