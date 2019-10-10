@@ -7,16 +7,17 @@ import time
 import hashlib
 import os
 import requests
+import datetime
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 
 #API_ENDPOINT = "http://104.155.2.231:3001/api/" #2 PEERS NET
 #WS_ENDPOINT = "ws://104.155.2.231:3000/api/" #2 PEERS NET
-API_ENDPOINT = "http://35.195.161.115:3001/api/"
-WS_ENDPOINT = "ws://35.195.161.115:3000/api/"
-#API_ENDPOINT = "http://34.76.209.105:3001/api/" #5 PEERS NET
-#WS_ENDPOINT = "ws://34.76.209.105:3000/api/" #5 PEERS NET
+API_ENDPOINT = "http://34.76.123.255:3001/api/" #3 ORGS NET
+WS_ENDPOINT = "ws://34.76.123.255:3000/api/" #3 ORGS NET
+#API_ENDPOINT = "http://35.241.200.124:3001/api/" #5 ORGS NET
+#WS_ENDPOINT = "ws://35.241.200.124:3000/api/" #5 ORGS NET
 NS = "ertis.uma.nuclear"
 
 async def eventListener(DEBUG=False):
@@ -24,57 +25,74 @@ async def eventListener(DEBUG=False):
     cred = credentials.Certificate("serviceAccountKey.json")
     firebase_admin.initialize_app(cred)
     async with websockets.connect(WS_ENDPOINT) as websocket:
-        if DEBUG:
-            print("Waiting for new event...")
-        cont = 0
-        time_list = []
-        while cont<100:
-            aux = await websocket.recv()
+        with open('results.txt', 'w') as f:
             if DEBUG:
-                print("NEW EVENT")
-            aux2 = json.loads(aux)
-            eventId = aux2['eventId']
-            acqId = aux2['acqId']
-            filename = aux2['filename']
-            hash_value = aux2['hash']
+                print("Waiting for new event...")
+            cont = 0
+            time_list = []
+            while cont<100:
+                aux = await websocket.recv()
+                if DEBUG:
+                    print("NEW EVENT")
+                aux2 = json.loads(aux)
+                eventId = aux2['eventId']
+                acqId = aux2['acqId']
+                filename = aux2['filename']
+                hash_value = aux2['hash']
+                if DEBUG:
+                    print(f"Event ID: {eventId}")
+                    print(f"Acquisition ID: {acqId}")
+                    print(f"Filename: {filename}")
+                    print(f"Hash value: {hash_value}")
+                print(f"Event ID: {eventId}", file=f)
+                print(f"Acquisition ID: {acqId}", file=f)
+                print(f"Filename: {filename}", file=f)
+                print(f"Hash value: {hash_value}", file=f)
+
+                #Waiting a little bit for file upload to repository by acquisitor process
+                time.sleep(10)
+
+                #Download file from repository
+                downloadFileFromRepository(filename)
+
+                #Compare downloaded file hash value with stored hash value
+                if checkHashSHA256(filename, hash_value):
+                    if DEBUG:
+                        print("Valid hash")
+
+                    #Get file content
+                    acqData = getFileContent(filename)
+
+                    #Delete local file
+                    deleteLocalFile(filename)
+
+                    #Send transaction
+                    elapsed_time = addAutomaticAnalysis(acqId, acqData)
+                    time_list.append(elapsed_time)
+                    if DEBUG:
+                        print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
+                    print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n", file=f)
+                else:
+                    if DEBUG:
+                        print("Not valid hash\r\n")
+                cont = cont+1
+
+            minimum = min(time_list)
+            min5avg = sum(time_list[0:5])/5
+            average = sum(time_list)/len(time_list)
+            maximum = max(time_list)
+            max5avg = sum(time_list[len(time_list)-5:len(time_list)])/5
             if DEBUG:
-                print(f"Event ID: {eventId}")
-                print(f"Acquisition ID: {acqId}")
-                print(f"Filename: {filename}")
-                print(f"Hash value: {hash_value}")
-
-            #Waiting a little bit for file upload to repository by acquisitor process
-            time.sleep(10)
-
-            #Download file from repository
-            downloadFileFromRepository(filename)
-
-            #Compare downloaded file hash value with stored hash value
-            if checkHashSHA256(filename, hash_value):
-                if DEBUG:
-                    print("Valid hash")
-
-                #Get file content
-                acqData = getFileContent(filename)
-
-                #Delete local file
-                deleteLocalFile(filename)
-
-                #Send transaction
-                elapsed_time = addAutomaticAnalysis(acqId, acqData)
-                time_list.append(elapsed_time)
-                if DEBUG:
-                    print(f"Elapsed time adding automatic analysis: {elapsed_time}\r\n")
-            else:
-                if DEBUG:
-                    print("Not valid hash\r\n")
-            cont = cont+1
-        minimum = min(time_list)
-        average = sum(time_list)/len(time_list)
-        maximum = max(time_list)
-        print(f"Fastest automatic analysis: {minimum}")
-        print(f"Average time while executing automatic analysis: {average}")
-        print(f"Slowest automatic analysis: {maximum}")
+                print(f"Fastest automatic analysis: {minimum}")
+                print(f"Average 5 fastest: {min5avg}")
+                print(f"Average time while executing automatic analysis: {average}")
+                print(f"Slowest automatic analysis: {maximum}")
+                print(f"Average 5 slowest: {max5avg}")
+            print(f"Fastest automatic analysis: {minimum}", file=f)
+            print(f"Average 5 fastest: {min5avg}", file=f)
+            print(f"Average time while executing automatic analysis: {average}", file=f)
+            print(f"Slowest automatic analysis: {maximum}", file=f)
+            print(f"Average 5 slowest: {max5avg}", file=f)
 
 
 def downloadFileFromRepository(filename):
@@ -112,6 +130,7 @@ def addAutomaticAnalysis(acqId, acqData, DEBUG=False):
     resource_url = f"{API_ENDPOINT}{NS}.AddAutomaticAnalysis"
     data = {
         "analysisId": acqId,
+        "analysisDate": generateDateTime(),
         "acqId": acqId,
         "acqData": acqData
     }
@@ -123,5 +142,11 @@ def addAutomaticAnalysis(acqId, acqData, DEBUG=False):
         print(f"Response status code: {r.status_code}")
         print(r.json())
     return elapsed_time
+
+def generateDateTime():
+    x = str(datetime.datetime.now()).replace(" ", "T")
+    x2 = x[:len(x)-3]+"Z"
+
+    return x2
 
 asyncio.get_event_loop().run_until_complete(eventListener(True))

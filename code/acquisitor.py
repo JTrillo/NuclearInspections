@@ -37,7 +37,7 @@ class Acquisitor(threading.Thread):
 
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
-            time.sleep(random.randint(10, 15)) #GETTING DATA
+            time.sleep(random.randint(30, 60)) #GETTING DATA
 
             # Generating file
             filename = self.generateFilename(i)
@@ -56,9 +56,12 @@ class Acquisitor(threading.Thread):
             # Deleting local file
             self.deleteLocalFile(filename)
 
+        time_list.sort()
         self.min = min(time_list)
-        self.avg = sum(time_list)/self.times
+        self.min5avg = sum(time_list[0:5])/5
+        self.avg = sum(time_list)/len(time_list)
         self.max = max(time_list)
+        self.max5avg = sum(time_list[len(time_list)-5:len(time_list)])/5
 
     def generateFilename(self, acqId):
         if acqId < 10:
@@ -75,7 +78,7 @@ class Acquisitor(threading.Thread):
         f = open(filename, "w")
 
         content = []
-        n = 100000
+        n = 50000
         for i in range(0, n):
             aux = random.randint(-5000, 5000)
             content.append(aux)
@@ -132,7 +135,9 @@ class Acquisitor(threading.Thread):
 
     def printResults(self):
         print(f"{self.acq_name} - Fastest acquisition added in {self.min} seconds")
+        print(f"{self.acq_name} - Average 5 fastest: {self.min5avg} seconds")
         print(f"{self.acq_name} - Slowest acquisition added in {self.max} seconds")
+        print(f"{self.acq_name} - Average 5 slowest: {self.max5avg} seconds")
         print(f"{self.acq_name} - Average time adding acquisitions: {self.avg} seconds")
     
     def generateDateTime(self):

@@ -10,6 +10,7 @@ from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
 import os
+import datetime
 
 class Analyst(threading.Thread):
 
@@ -73,14 +74,19 @@ class Analyst(threading.Thread):
             else:
                 self.times = self.times - 1
             
+        time_list.sort()
         self.min_get = min(time_list)
-        self.avg_get = sum(time_list)/self.times
+        self.min5avg_get = sum(time_list[0:5])/5
+        self.avg_get = sum(time_list)/time_list
         self.max_get = max(time_list)
+        self.max5avg_get = sum(time_list[len(time_list)-5:len(time_list)])/5
 
+        time_list2.sort()
         self.min_add = min(time_list2)
-        self.avg_add = sum(time_list2)/self.times
+        self.min5avg_add = sum(time_list2[0:5])/5
+        self.avg_add = sum(time_list2)/time_list
         self.max_add = max(time_list2)
-
+        self.max5avg_add = sum(time_list2[len(time_list2)-5:len(time_list2)])/5
 
     def getAcquisition(self, acqId):
         start_time = time.time()
