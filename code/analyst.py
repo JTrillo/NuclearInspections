@@ -63,7 +63,7 @@ class Analyst(threading.Thread):
                 # Analyzing
                 if self.DEBUG:
                     print(f"Analyst-{self.analyst_name} --> Analyzing {filename}")
-                time.sleep(random.randint(30, 60)) #ANALYZING
+                time.sleep(random.randint(5, 10)) #ANALYZING
 
                 # Add Analysis
                 analysis = self.addAnalysis(i, tube_length)
@@ -72,19 +72,19 @@ class Analyst(threading.Thread):
                 # Delete local file
                 self.deleteLocalFile(filename)
             else:
-                self.times = self.times - 1
+                print(f"HASH NOT VALID {filename}")
             
         time_list.sort()
         self.min_get = min(time_list)
         self.min5avg_get = sum(time_list[0:5])/5
-        self.avg_get = sum(time_list)/time_list
+        self.avg_get = sum(time_list)/len(time_list)
         self.max_get = max(time_list)
         self.max5avg_get = sum(time_list[len(time_list)-5:len(time_list)])/5
 
         time_list2.sort()
         self.min_add = min(time_list2)
         self.min5avg_add = sum(time_list2[0:5])/5
-        self.avg_add = sum(time_list2)/time_list
+        self.avg_add = sum(time_list2)/len(time_list)
         self.max_add = max(time_list2)
         self.max5avg_add = sum(time_list2[len(time_list2)-5:len(time_list2)])/5
 
@@ -94,7 +94,7 @@ class Analyst(threading.Thread):
         elapsed_time = time.time() - start_time
         if self.DEBUG:
             print(r.json()['filename'])
-        return (elapsed_time, r.json()['filename'], r.json()['hash'], r.json()['tube'])
+        return (elapsed_time, r.json()['filename'], r.json()['hash'], r.json()['tube'].split('#')[1])
 
     def downloadFileFromRepository(self, filename):
         bucket = storage.bucket("hyperledger-jte.appspot.com")
@@ -127,6 +127,7 @@ class Analyst(threading.Thread):
             acqId = 100
         data = {
             "analysisId": anaId,
+            "analysisDate": self.generateDateTime(),
             "acqId": acqId,
             "indications": self.generateIndications(tubeLength)
         }
@@ -152,7 +153,7 @@ class Analyst(threading.Thread):
         n_ind = random.randint(0, 4)
 
         indications = []
-        for i in range(n_ind):
+        if n_ind == 1:
             indication = "Detected "
             ind_type = random.randint(0, 2)
             if ind_type == 0:
@@ -167,8 +168,25 @@ class Analyst(threading.Thread):
 
             indication += f", position {pos}"
 
-            # Add indication
-            indications.append(indication)
+            indications = [indication, ""]
+        elif n_ind > 1:
+            for i in range(n_ind):
+                indication = "Detected "
+                ind_type = random.randint(0, 2)
+                if ind_type == 0:
+                    indication += "fissure" # Grieta
+                elif ind_type == 1:
+                    indication += "break" # Rotura
+                elif ind_type == 2:
+                    indication += "dent" # Abolladura
+
+                # Random position
+                pos = random.random() * tubeLength
+
+                indication += f", position {pos}"
+
+                # Add indication
+                indications.append(indication)
 
         return indications
     
@@ -177,3 +195,9 @@ class Analyst(threading.Thread):
             os.remove(filename)
         else:
             print(f"File {filename} does not exist")
+    
+    def generateDateTime(self):
+        x = str(datetime.datetime.now()).replace(" ", "T")
+        x2 = x[:len(x)-3]+"Z"
+
+        return x2

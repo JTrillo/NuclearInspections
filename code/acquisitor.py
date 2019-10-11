@@ -102,8 +102,8 @@ class Acquisitor(threading.Thread):
     def addAcquisition(self, acqId, filename, hash_value):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAcquisition"
         tubeId = acqId%100
-        if tubeId == 0:
-            tubeId = 100
+        '''if tubeId == 0:
+            tubeId = 100'''
         data = {
             "acqId": acqId,
             "acqDate": self.generateDateTime(),
