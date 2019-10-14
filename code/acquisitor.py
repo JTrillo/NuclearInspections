@@ -37,7 +37,7 @@ class Acquisitor(threading.Thread):
 
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
-            time.sleep(random.randint(30, 60)) #GETTING DATA
+            time.sleep(random.randint(2, 4)) #GETTING DATA
 
             # Generating file
             filename = self.generateFilename(i)

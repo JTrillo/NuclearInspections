@@ -20,6 +20,7 @@ WS_ENDPOINT = "ws://34.76.123.255:3000/api/" #3 ORGS NET
 #WS_ENDPOINT = "ws://35.241.200.124:3000/api/" #5 ORGS NET
 NS = "ertis.uma.nuclear"
 
+# USING EVENTS
 async def eventListener(DEBUG=False):
     print("EVENT LISTENER STARTED")
     cred = credentials.Certificate("serviceAccountKey.json")
@@ -94,6 +95,39 @@ async def eventListener(DEBUG=False):
             print(f"Slowest automatic analysis: {maximum}", file=f)
             print(f"Average 5 slowest: {max5avg}", file=f)
 
+# RETRIEVING FILES FROM REPOSITORY
+def addMultipleAutomaticAnalysis():
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)
+
+    time_list = []
+    for i in range(1, 101):
+        filename = "acq"
+        if i < 10:
+            filename = filename + "00" + str(i) + ".txt"
+        elif i < 100:
+            filename = filename + "0" + str(i) + ".txt"
+        else:
+            filename = filename + str(i) + ".txt"
+
+        #Download file from repository
+        downloadFileFromRepository(filename)
+
+        #Get file content
+        acqData = getFileContent(filename)
+
+        #Delete local file
+        deleteLocalFile(filename)
+
+        #Send transaction
+        elapsed_time = addAutomaticAnalysis(i, acqData)
+        time_list.append(elapsed_time)
+        print(f"Elapsed time adding automatic analysis: {elapsed_time}")
+        time.sleep(2)
+    
+    print(f"Fastest --> {min(time_list)}")
+    print(f"Slowest --> {max(time_list)}")
+    print(f"Average --> {sum(time_list)/len(time_list)}")
 
 def downloadFileFromRepository(filename):
     bucket = storage.bucket("hyperledger-jte.appspot.com")
@@ -129,7 +163,7 @@ def deleteLocalFile(filename):
 def addAutomaticAnalysis(acqId, acqData, DEBUG=False):
     resource_url = f"{API_ENDPOINT}{NS}.AddAutomaticAnalysis"
     data = {
-        "analysisId": acqId,
+        "analysisId": acqId+200,
         "analysisDate": generateDateTime(),
         "acqId": acqId,
         "acqData": acqData

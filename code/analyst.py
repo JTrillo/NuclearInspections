@@ -34,7 +34,10 @@ class Analyst(threading.Thread):
         time_list2 = []
 
         cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(cred)
+        if self.analyst_name == 'Analyst-0':
+            firebase_admin.initialize_app(cred)
+        else:
+            firebase_admin.initialize_app(cred, name=self.analyst_name)
 
         for i in range(self.begin, self.begin+self.times):
             acqId = i%100
@@ -84,7 +87,7 @@ class Analyst(threading.Thread):
         time_list2.sort()
         self.min_add = min(time_list2)
         self.min5avg_add = sum(time_list2[0:5])/5
-        self.avg_add = sum(time_list2)/len(time_list)
+        self.avg_add = sum(time_list2)/len(time_list2)
         self.max_add = max(time_list2)
         self.max5avg_add = sum(time_list2[len(time_list2)-5:len(time_list2)])/5
 
@@ -142,11 +145,15 @@ class Analyst(threading.Thread):
 
     def printResults(self):
         print(f"{self.analyst_name} - Fastest acquisition gotten in {self.min_get} seconds")
+        print(f"{self.analyst_name} - Average 5 fastest get: {self.min5avg_get} seconds")
         print(f"{self.analyst_name} - Slowest acquisition gotten in {self.max_get} seconds")
+        print(f"{self.analyst_name} - Average 5 slowest get: {self.max5avg_get} seconds")
         print(f"{self.analyst_name} - Average time getting acquisitions: {self.avg_get} seconds")
 
         print(f"{self.analyst_name} - Fastest analysis added in {self.min_add} seconds")
+        print(f"{self.analyst_name} - Average 5 fastest add: {self.min5avg_add} seconds")
         print(f"{self.analyst_name} - Slowest analysis added in {self.max_add} seconds")
+        print(f"{self.analyst_name} - Average 5 slowest add: {self.max5avg_add} seconds")
         print(f"{self.analyst_name} - Average time adding analysis: {self.avg_add} seconds")
     
     def generateIndications(self, tubeLength):
