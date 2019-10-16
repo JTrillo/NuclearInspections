@@ -10,6 +10,7 @@ from firebase_admin import credentials
 from firebase_admin import storage
 import hashlib
 import os
+import datetime
 
 class AdvancedAnalyst(threading.Thread):
 
@@ -34,7 +35,10 @@ class AdvancedAnalyst(threading.Thread):
         time_list3 = []
 
         cred = credentials.Certificate("serviceAccountKey.json")
-        firebase_admin.initialize_app(cred)
+        if self.analyst_name == 'Advanced Analyst-0':
+            firebase_admin.initialize_app(cred)
+        else:
+            firebase_admin.initialize_app(cred, name=self.analyst_name)
 
         for i in range(self.begin, self.begin+self.times):
             acqId = i%100
@@ -63,7 +67,7 @@ class AdvancedAnalyst(threading.Thread):
                 # Analyzing
                 if self.DEBUG:
                     print(f"Advanced Analyst-{self.analyst_name} --> Resolving {filename}")
-                time.sleep(random.randint(30, 60)) #ANALYZING
+                time.sleep(random.randint(5, 10)) #ANALYZING
 
                 # Add Resolution
                 resolution = self.addResolution(i)
@@ -72,19 +76,28 @@ class AdvancedAnalyst(threading.Thread):
                 # Delete local file
                 self.deleteLocalFile(filename)
             else:
-                self.times = self.times - 1
-            
+                print(f"HASH NOT VALID {filename}")
+        
+        time_list.sort()
         self.min_get_acq = min(time_list)
+        self.min5avg_get_acq = sum(time_list[0:5])/5
         self.avg_get_acq = sum(time_list)/self.times
         self.max_get_acq = max(time_list)
+        self.max5avg_get_acq = sum(time_list[len(time_list)-5:len(time_list)])/5
 
+        time_list2.sort()
         self.min_get_ana = min(time_list2)
+        self.min5avg_get_ana = sum(time_list2[0:5])/5
         self.avg_get_ana = sum(time_list2)/self.times
         self.max_get_ana = max(time_list2)
+        self.max5avg_get_ana = sum(time_list2[len(time_list2)-5:len(time_list2)])/5
 
+        time_list3.sort()
         self.min_add = min(time_list3)
+        self.min5avg_add = sum(time_list3[0:5])/5
         self.avg_add = sum(time_list3)/self.times
         self.max_add = max(time_list3)
+        self.max5avg_add = sum(time_list3[len(time_list3)-5:len(time_list3)])/5
 
 
     def getAcquisition(self, acqId):
@@ -113,7 +126,7 @@ class AdvancedAnalyst(threading.Thread):
         return hash_sha256.hexdigest()
     
     def getAnalysis(self, acqId):
-        acq_fqi = f"resource%3A{self.NS}.%23{acqId}"
+        acq_fqi = f"resource%3A{self.NS}.Acquisition%23{acqId}"
         start_time = time.time()
         r = requests.get(f"{self.API_ENDPOINT}queries/AnalysisByAcquisition?acq_fqi={acq_fqi}")
         elapsed_time = time.time() - start_time
@@ -131,11 +144,12 @@ class AdvancedAnalyst(threading.Thread):
         possibleOptions = ["Everything OK", "Primary OK", "Secondary OK", "Automatic OK", "Primary & Secondary OK", "Primary & Automatic OK", "Secondary & Automatic OK"]
         data = {
             "analysisId": anaId,
+            "analysisDate": self.generateDateTime(),
             "acqId": acqId,
-            "indications": [random.choice(possibleOptions)]
+            "indications": [random.choice(possibleOptions), ""]
         }
         start_time = time.time()
-        r = requests.post(resource_url, data=json.dumps(data), headers={'Content-Type': 'application/json'})
+        r = requests.post(resource_url, data=data)
         elapsed_time = time.time() - start_time
         if self.DEBUG:
             print(f"Elapsed time: {elapsed_time}")
@@ -151,13 +165,25 @@ class AdvancedAnalyst(threading.Thread):
 
     def printResults(self):
         print(f"{self.analyst_name} - Fastest acquisition gotten in {self.min_get_acq} seconds")
+        print(f"{self.analyst_name} - Avg. 5 fastest acqs gotten: {self.min5avg_get_acq} seconds")
         print(f"{self.analyst_name} - Slowest acquisition gotten in {self.max_get_acq} seconds")
+        print(f"{self.analyst_name} - Avg. 5 slowest acqs gotten: {self.max5avg_get_acq} seconds")
         print(f"{self.analyst_name} - Average time getting acquisitions: {self.avg_get_acq} seconds")
 
-        print(f"{self.analyst_name} - Fastest analysis couple gotten in {self.min_get_ana} seconds")
-        print(f"{self.analyst_name} - Slowest analysis couple gotten in {self.max_get_ana} seconds")
-        print(f"{self.analyst_name} - Average time getting analysis couple: {self.avg_get_ana} seconds")
+        print(f"{self.analyst_name} - Fastest analyses gotten in {self.min_get_ana} seconds")
+        print(f"{self.analyst_name} - Avg. 5 fastest analyses gotten: {self.min5avg_get_ana} seconds")
+        print(f"{self.analyst_name} - Slowest analyses gotten in {self.max_get_ana} seconds")
+        print(f"{self.analyst_name} - Avg. 5 slowest analyses gotten: {self.max5avg_get_ana} seconds")
+        print(f"{self.analyst_name} - Average time getting analyses: {self.avg_get_ana} seconds")
 
         print(f"{self.analyst_name} - Fastest analysis added in {self.min_add} seconds")
+        print(f"{self.analyst_name} - Avg. 5 fastest analysis added: {self.min5avg_add} seconds")
         print(f"{self.analyst_name} - Slowest analysis added in {self.max_add} seconds")
+        print(f"{self.analyst_name} - Avg. 5 slowest analysis added: {self.max5avg_add} seconds")
         print(f"{self.analyst_name} - Average time adding analysis: {self.avg_add} seconds")
+
+    def generateDateTime(self):
+        x = str(datetime.datetime.now()).replace(" ", "T")
+        x2 = x[:len(x)-3]+"Z"
+
+        return x2

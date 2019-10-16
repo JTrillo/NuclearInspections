@@ -8,6 +8,7 @@ import plotly
 import plotly.graph_objs as go
 from acquisitor import *
 from analyst import *
+from advancedAnalyst import *
 from cleaner import *
 
 #API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
@@ -143,23 +144,31 @@ def addAcquisitionTest(num_acquisitors, num_tubes):
         
     # Print results
     min = acquisitor_threads[0].min
+    min5avg = acquisitor_threads[0].min5avg
     avg = acquisitor_threads[0].avg
     max = acquisitor_threads[0].max
+    max5avg = acquisitor_threads[0].max5avg
     acquisitor_threads[0].printResults()
     for i in range(1, num_acquisitors):
         if acquisitor_threads[i].min < min:
             min = acquisitor_threads[i].min
+            
+        min5avg = min5avg + acquisitor_threads[i].min5avg
 
         avg = avg + acquisitor_threads[i].avg
 
         if acquisitor_threads[i].max > max:
             max = acquisitor_threads[i].max
+            
+        max5avg = max5avg + acquisitor_threads[i].max5avg
 
         acquisitor_threads[i].printResults()
 
-    print(f"MIN ADD ACQ --> {min}")
-    print(f"AVG ADD ACQ --> {avg/num_acquisitors}")
-    print(f"MAX ADD ACQ --> {max}")
+    print(f"MIN --> {min}")
+    print(f"MIN 5 AVG --> {min5avg/num_acquisitors}")
+    print(f"AVG --> {avg/num_acquisitors}")
+    print(f"MAX --> {max}")
+    print(f"MAX 5 AVG --> {max5avg/num_acquisitors}")
 
 def addAnalysisTest(num_analysts, num_acqs):
     analyst_threads = []
@@ -185,41 +194,72 @@ def addAnalysisTest(num_analysts, num_acqs):
         
     # Print results
     min_get = analyst_threads[0].min_get
+    if num_analysts <= 10:
+        min5avg_get = analyst_threads[0].min5avg_get
     avg_get = analyst_threads[0].avg_get
     max_get = analyst_threads[0].max_get
+    if num_analysts <= 10:
+        max5avg_get = analyst_threads[0].max5avg_get
+    
     min_add = analyst_threads[0].min_add
+    if num_analysts <= 10:
+        min5avg_add = analyst_threads[0].min5avg_add
     avg_add = analyst_threads[0].avg_add
     max_add = analyst_threads[0].max_add
+    if num_analysts <= 10:
+        max5avg_add = analyst_threads[0].max5avg_add
+    
     analyst_threads[0].printResults()
     for i in range(1, num_analysts):
         if analyst_threads[i].min_get < min_get:
             min_get = analyst_threads[i].min_get
+        
+        if num_analysts <= 10:
+            min5avg_get = min5avg_get + analyst_threads[i].min5avg_get
 
         avg_get = avg_get + analyst_threads[i].avg_get
 
         if analyst_threads[i].max_get > max_get:
             max_get = analyst_threads[i].max_get
             
+        if num_analysts <= 10:
+            max5avg_get = max5avg_get + analyst_threads[i].max5avg_get
+            
         if analyst_threads[i].min_add < min_add:
             min_add = analyst_threads[i].min_add
+            
+        if num_analysts <= 10:
+            min5avg_add = min5avg_add + analyst_threads[i].min5avg_add
             
         avg_add = avg_add + analyst_threads[i].avg_add
         
         if analyst_threads[i].max_get > max_get:
-            max_get = analyst_threads[i].max_get
+            max_add = analyst_threads[i].max_add
+        
+        if num_analysts <= 10:
+            max5avg_add = max5avg_add + analyst_threads[i].max5avg_add
 
         analyst_threads[i].printResults()
 
     print(f"MIN GET ACQ --> {min_get}")
+    if num_analysts <= 10:
+        print(f"MIN 5 GET ACQ --> {min5avg_get/num_analysts}")
     print(f"AVG GET ACQ --> {avg_get/num_analysts}")
     print(f"MAX GET ACQ --> {max_get}")
+    if num_analysts <= 10:
+        print(f"MAX 5 GET ACQ --> {max5avg_get/num_analysts}")
+    
     print(f"MIN ADD ANA --> {min_add}")
+    if num_analysts <= 10:
+        print(f"MIN 5 GET ANA --> {min5avg_add/num_analysts}")
     print(f"AVG ADD ANA --> {avg_add/num_analysts}")
     print(f"MAX ADD ANA --> {max_add}")
+    if num_analysts <= 10:
+        print(f"MAX 5 GET ANA --> {max5avg_add/num_analysts}")
 
     print("Add Analysis Test Finalized")
 
-def addAdvancedAnalysisTest(num_analysts, num_acqs):
+def addResolutionTest(num_analysts, num_acqs):
     analyst_threads = []
     analysis_per_worker = int(num_acqs/num_analysts)
     
@@ -243,58 +283,105 @@ def addAdvancedAnalysisTest(num_analysts, num_acqs):
         
     # Print results
     min_get_acq = analyst_threads[0].min_get_acq
+    if num_analysts <= 10:
+        min5avg_get_acq = analyst_threads[0].min5avg_get_acq
     avg_get_acq = analyst_threads[0].avg_get_acq
     max_get_acq = analyst_threads[0].max_get_acq
+    if num_analysts <= 10:
+        max5avg_get_acq = analyst_threads[0].max5avg_get_acq
+    
     min_get_ana = analyst_threads[0].min_get_ana
+    if num_analysts <= 10:
+        min5avg_get_ana = analyst_threads[0].min5avg_get_ana
     avg_get_ana = analyst_threads[0].avg_get_ana
     max_get_ana = analyst_threads[0].max_get_ana
+    if num_analysts <= 10:
+        max5avg_get_ana = analyst_threads[0].max5avg_get_ana
+    
     min_add = analyst_threads[0].min_add
+    if num_analysts <= 10:
+        min5avg_add = analyst_threads[0].min5avg_add
     avg_add = analyst_threads[0].avg_add
     max_add = analyst_threads[0].max_add
+    if num_analysts <= 10:
+        max5avg_add = analyst_threads[0].max5avg_add
+    
     analyst_threads[0].printResults()
     for i in range(1, num_analysts):
         if analyst_threads[i].min_get_acq < min_get_acq:
             min_get_acq = analyst_threads[i].min_get_acq
+        
+        if num_analysts <= 10:
+            min5avg_get_acq = min5avg_get_acq + analyst_threads[0].min5avg_get_acq
 
         avg_get_acq = avg_get_acq + analyst_threads[i].avg_get_acq
 
         if analyst_threads[i].max_get_acq > max_get_acq:
             max_get_acq = analyst_threads[i].max_get_acq
         
+        if num_analysts <= 10:
+            max5avg_get_acq = max5avg_get_acq + analyst_threads[0].max5avg_get_acq
+        
         if analyst_threads[i].min_get_ana < min_get_ana:
             min_get_ana = analyst_threads[i].min_get_ana
+        
+        if num_analysts <= 10:
+            min5avg_get_ana = min5avg_get_ana + analyst_threads[0].min5avg_get_ana
 
         avg_get_ana = avg_get_ana + analyst_threads[i].avg_get_ana
 
         if analyst_threads[i].max_get_ana > max_get_ana:
             max_get_ana = analyst_threads[i].max_get_ana
+        
+        if num_analysts <= 10:
+            max5avg_get_ana = max5avg_get_ana + analyst_threads[0].max5avg_get_ana
             
         if analyst_threads[i].min_add < min_add:
             min_add = analyst_threads[i].min_add
             
+        if num_analysts <= 10:
+            min5avg_add = min5avg_add + analyst_threads[0].min5avg_add
+            
         avg_add = avg_add + analyst_threads[i].avg_add
         
-        if analyst_threads[i].max_get > max_get:
-            max_get = analyst_threads[i].max_get
+        if analyst_threads[i].max_add > max_add:
+            max_add = analyst_threads[i].max_add
+        
+        if num_analysts <= 10:
+            max5avg_add = max5avg_add + analyst_threads[0].max5avg_add
 
         analyst_threads[i].printResults()
 
     print(f"MIN GET ACQ --> {min_get_acq}")
+    if num_analysts <= 10:
+        print(f"MIN 5 GET ACQ --> {min5avg_get_acq/num_analysts}")
     print(f"AVG GET ACQ --> {avg_get_acq/num_analysts}")
     print(f"MAX GET ACQ --> {max_get_acq}")
+    if num_analysts <= 10:
+        print(f"MAX 5 GET ACQ --> {max5avg_get_acq/num_analysts}")
+    
     print(f"MIN GET ANA --> {min_get_ana}")
+    if num_analysts <= 10:
+        print(f"MIN 5 GET ANA --> {min5avg_get_ana/num_analysts}")
     print(f"AVG GET ANA --> {avg_get_ana/num_analysts}")
     print(f"MAX GET ANA --> {max_get_ana}")
+    if num_analysts <= 10:
+        print(f"MAX 5 GET ANA --> {max5avg_get_ana/num_analysts}")
+    
     print(f"MIN ADD ANA --> {min_add}")
+    if num_analysts <= 10:
+        print(f"MIN 5 ADD ANA --> {min5avg_add/num_analysts}")
     print(f"AVG ADD ANA --> {avg_add/num_analysts}")
     print(f"MAX ADD ANA --> {max_add}")
+    if num_analysts <= 10:
+        print(f"MAX 5 ADD ANA --> {max5avg_add/num_analysts}")
 
-    print("Add Analysis Test Finalized")
+    print("Add Resolution Test Finalized")
 
-cleanMultithreading(10, False, True, 201)
+#cleanMultithreading(10, True, False, 1)
 #addTubes(100)
 #workAndCalibration()
-#addAcquisitionTest(1, 1) #Acquisitors, Acquisitions to do
+#addAcquisitionTest(1, 100) #Acquisitors, Acquisitions to do
 #addAnalysisTest(10, 100) #Analysts, Analysis to do
-#addAdvancedAnalysisTest(1, 100)
+#addResolutionTest(1, 100)
 

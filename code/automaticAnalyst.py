@@ -12,6 +12,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import storage
 
+#API_ENDPOINT = "http://35.187.19.191:3000/api/" #TESTING NET
 #API_ENDPOINT = "http://104.155.2.231:3001/api/" #2 PEERS NET
 #WS_ENDPOINT = "ws://104.155.2.231:3000/api/" #2 PEERS NET
 API_ENDPOINT = "http://34.76.123.255:3001/api/" #3 ORGS NET
@@ -122,7 +123,7 @@ def addMultipleAutomaticAnalysis():
         #Send transaction
         elapsed_time = addAutomaticAnalysis(i, acqData)
         time_list.append(elapsed_time)
-        print(f"Elapsed time adding automatic analysis: {elapsed_time}")
+        print(f"Elapsed time adding automatic analysis for acquisition {i}: {elapsed_time}")
         time.sleep(2)
     
     print(f"Fastest --> {min(time_list)}")
@@ -183,4 +184,5 @@ def generateDateTime():
 
     return x2
 
-asyncio.get_event_loop().run_until_complete(eventListener(True))
+#asyncio.get_event_loop().run_until_complete(eventListener(True))
+addMultipleAutomaticAnalysis()
