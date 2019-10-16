@@ -549,6 +549,7 @@ All Org machines
 #### 9.2. Create a new Business Network archive and install it
 For all Orgs machines
 ```
+mkdir /tmp/composer
 composer archive create -t dir -n ~/HyperledgerComposer/nuclear_auto -a /tmp/composer/archive.bna
 ```
 
@@ -578,27 +579,7 @@ composer network install -a /tmp/composer/archive.bna -c PeerAdmin@nuclear-org5
 ```
 
 ### 9.3 Upgrade the network
-Org1 machine
+Do it only in one single Org machine, i.e. org1 machine
 ```
 composer network upgrade -c PeerAdmin@nuclear-org1 -n nuclear_auto -V NETWORK-VERSION
-```
-
-Org2 machine
-```
-composer network upgrade -c PeerAdmin@nuclear-org2 -n nuclear_auto -V NETWORK-VERSION
-```
-
-Org3 machine
-```
-composer network upgrade -c PeerAdmin@nuclear-org3 -n nuclear_auto -V NETWORK-VERSION
-```
-
-Org4 machine
-```
-composer network upgrade -c PeerAdmin@nuclear-org4 -n nuclear_auto -V NETWORK-VERSION
-```
-
-Org5 machine
-```
-composer network upgrade -c PeerAdmin@nuclear-org5 -n nuclear_auto -V NETWORK-VERSION
 ```
