@@ -378,7 +378,7 @@ def addResolutionTest(num_analysts, num_acqs):
 
     print("Add Resolution Test Finalized")
 
-#cleanMultithreading(10, True, False, 1)
+cleanMultithreading(10, False, True, 301)
 #addTubes(100)
 #workAndCalibration()
 #addAcquisitionTest(1, 100) #Acquisitors, Acquisitions to do
