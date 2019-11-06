@@ -72,10 +72,11 @@ class Analyst(threading.Thread):
                 analysis = self.addAnalysis(i, tube_length)
                 time_list2.append(analysis)
 
-                # Delete local file
-                self.deleteLocalFile(filename)
             else:
                 print(f"HASH NOT VALID {filename}")
+
+            # Delete local file
+            self.deleteLocalFile(filename)
             
         time_list.sort()
         self.min_get = min(time_list)

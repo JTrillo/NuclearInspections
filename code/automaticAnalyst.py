@@ -65,9 +65,6 @@ async def eventListener(DEBUG=False):
                     #Get file content
                     acqData = getFileContent(filename)
 
-                    #Delete local file
-                    deleteLocalFile(filename)
-
                     #Send transaction
                     elapsed_time = addAutomaticAnalysis(acqId, acqData)
                     time_list.append(elapsed_time)
@@ -78,6 +75,9 @@ async def eventListener(DEBUG=False):
                     if DEBUG:
                         print("Not valid hash\r\n")
                 cont = cont+1
+
+                #Delete local file
+                deleteLocalFile(filename)
 
             minimum = min(time_list)
             min5avg = sum(time_list[0:5])/5

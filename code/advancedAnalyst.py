@@ -73,11 +73,12 @@ class AdvancedAnalyst(threading.Thread):
                 resolution = self.addResolution(i)
                 time_list3.append(resolution)
 
-                # Delete local file
-                self.deleteLocalFile(filename)
             else:
                 print(f"HASH NOT VALID {filename}")
-        
+
+        # Delete local file
+        self.deleteLocalFile(filename)
+
         time_list.sort()
         self.min_get_acq = min(time_list)
         self.min5avg_get_acq = sum(time_list[0:5])/5
