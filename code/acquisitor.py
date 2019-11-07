@@ -78,7 +78,7 @@ class Acquisitor(threading.Thread):
         f = open(filename, "w")
 
         content = []
-        n = 50000
+        n = 40850 # 40850 - 250KB, 81700 - 500KB, 167400 - 1MB
         for i in range(0, n):
             aux = random.randint(-5000, 5000)
             content.append(aux)
@@ -102,14 +102,15 @@ class Acquisitor(threading.Thread):
     def addAcquisition(self, acqId, filename, hash_value):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAcquisition"
         tubeId = acqId%100
-        '''if tubeId == 0:
-            tubeId = 100'''
+        if tubeId == 0:
+            tubeId = 100
+        calId = int(acqId/25) + 1 #25 is the number of acquisitions per calibration
         data = {
             "acqId": acqId,
             "acqDate": self.generateDateTime(),
             "filename": filename,
             "hash": hash_value,
-            "calId": "1",
+            "calId": calId,
             "tubeId": tubeId,
         }
         start_time = time.time()

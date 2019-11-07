@@ -6,14 +6,15 @@ import json
 import random
 import plotly
 import plotly.graph_objs as go
+import datetime
 from acquisitor import *
 from analyst import *
 from advancedAnalyst import *
 from cleaner import *
 
 #API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
-#API_ENDPOINT = "http://34.76.123.255:3000/api/" #3 PEERS NET
-API_ENDPOINT = "http://35.241.200.124:3000/api/" #5 PEERS NET
+API_ENDPOINT = "http://34.76.123.255:3000/api/" #3 PEERS NET
+#API_ENDPOINT = "http://35.241.200.124:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 #RUN SERVER WITH CARD ADMIN BEFORE EXECUTE THIS FUNCTION
@@ -78,25 +79,32 @@ def cleanMultithreading(num_threads, acq, ana, begin=-1, totalDeletes=100):
             threads_ana[i].join()
 
 def addTubes(n_tubes):
+    # Check for next tube id
+    resource_url = f"{API_ENDPOINT}{NS}.Tube"
+    r = requests.get(resource_url)
+    next_id = len(r.json()) + 1
+
     resource_url = f"{API_ENDPOINT}{NS}.RegisterTube"
+
     for i in range(n_tubes):
         data = {
-            "tubeId": i,
+            "tubeId": i+next_id,
             "posX": random.randint(0, 100),
             "posY": random.randint(0, 100),
             "length": random.randint(5, 20)
         }
         r = requests.post(resource_url, data=data)
         if r.status_code == requests.codes.ok:
-            print(f"Added tube {i}")
+            print(f"Added tube {i+next_id}")
         else:
-            print(f"Error when adding tube {i}")
+            print(f"Error when adding tube {i+next_id}")
 
-def workAndCalibration():
+def addWorkAndCalibrations():
     #Create work 1
     resource_url = f"{API_ENDPOINT}{NS}.CreateWork"
     data = {
         "workId": "1",
+        "workDate": generateDateTime(),
         "description": "Testing"
     }
     r = requests.post(resource_url, data=data)
@@ -105,20 +113,45 @@ def workAndCalibration():
     else:
         print(f"Error when creating work 1")
 
-    #Add calibration 1
-    resource_url = f"{API_ENDPOINT}{NS}.AddCalibration"
-    data = {
-        "calId": "1",
-        "equipment": "DRONE",
-        "workId": "1"
-    }
-    r = requests.post(resource_url, data=data)
-    if r.status_code == requests.codes.ok:
-        print("Added calibration 1")
-    else:
-        print("Error when adding calibration 1")
+    # Check how many tubes exist
+    resource_url = f"{API_ENDPOINT}{NS}.Tube"
+    r = requests.get(resource_url)
+    n_tubes = len(r.json())
+    n_calibrations = int(n_tubes / 25)
 
+    resource_url = f"{API_ENDPOINT}{NS}.AddCalibration"
+    for i in range(1, n_calibrations+1):
+        #Add calibration i
+        data = {
+            "calId": i,
+            "calDate": generateDateTime(),
+            "equipment": "DRONE",
+            "workId": "1"
+        }
+        r = requests.post(resource_url, data=data)
+        if r.status_code == requests.codes.ok:
+            print(f"Added calibration {i}")
+        else:
+            print(f"Error when adding calibration {i}")
+
+def getCalibrations(role):
+    # Check how many calibrations exist
+    resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+    r = requests.get(resource_url)
+    n_calibrations = len(r.json())
     
+    resource_url = f"{API_ENDPOINT}{NS}.GetCalibration"
+    for i in range(1, n_calibrations+1):
+        #Add calibration i
+        data = {
+            "calId": i,
+            "type": role
+        }
+        r = requests.post(resource_url, data=data)
+        if r.status_code == requests.codes.ok:
+            print(f"Gotten calibration {i}")
+        else:
+            print(f"Error when getting calibration {i}")
 
 def addAcquisitionTest(num_acquisitors, num_tubes):
     acquisitor_threads = []
@@ -378,10 +411,19 @@ def addResolutionTest(num_analysts, num_acqs):
 
     print("Add Resolution Test Finalized")
 
-cleanMultithreading(10, False, True, 301)
-#addTubes(100)
-#workAndCalibration()
-#addAcquisitionTest(1, 100) #Acquisitors, Acquisitions to do
-#addAnalysisTest(10, 100) #Analysts, Analysis to do
-#addResolutionTest(1, 100)
+def generateDateTime():
+    x = str(datetime.datetime.now()).replace(" ", "T")
+    x2 = x[:len(x)-3]+"Z"
+
+    return x2
+
+#cleanMultithreading(10, True, False, 1)
+#addTubes(250)
+#addWorkAndCalibrations()
+#addAcquisitionTest(1, 500) #Acquisitors, Acquisitions to do
+#getCalibrations('PRIMARY')
+#getCalibrations('SECONDARY')
+#addAnalysisTest(10, 500) #Analysts, Analysis to do
+#getCalibrations('RESOLUTION')
+#addResolutionTest(1, 500)
 
