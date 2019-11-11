@@ -6,14 +6,17 @@ import json
 import random
 import plotly
 import plotly.graph_objs as go
+import time
 import datetime
 from acquisitor import *
 from analyst import *
 from advancedAnalyst import *
+from automaticAnalyst import *
 from cleaner import *
 
 #API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
 API_ENDPOINT = "http://34.76.123.255:3000/api/" #3 PEERS NET
+API_ENDPOINT_2 = "http://34.76.123.255:3001/api/" #3 PEERS NET
 #API_ENDPOINT = "http://35.241.200.124:3000/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
@@ -134,26 +137,12 @@ def addWorkAndCalibrations():
         else:
             print(f"Error when adding calibration {i}")
 
-def getCalibrations(role):
-    # Check how many calibrations exist
-    resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+def addAcquisitionTest(num_acquisitors, filename):
+    # Get num tubes
+    resource_url = f"{API_ENDPOINT}{NS}.Tube"
     r = requests.get(resource_url)
-    n_calibrations = len(r.json())
-    
-    resource_url = f"{API_ENDPOINT}{NS}.GetCalibration"
-    for i in range(1, n_calibrations+1):
-        #Add calibration i
-        data = {
-            "calId": i,
-            "type": role
-        }
-        r = requests.post(resource_url, data=data)
-        if r.status_code == requests.codes.ok:
-            print(f"Gotten calibration {i}")
-        else:
-            print(f"Error when getting calibration {i}")
+    num_tubes = len(r.json())
 
-def addAcquisitionTest(num_acquisitors, num_tubes):
     acquisitor_threads = []
     acquisitions_per_worker = int(num_tubes/num_acquisitors)
 
@@ -167,6 +156,7 @@ def addAcquisitionTest(num_acquisitors, num_tubes):
         thread = Acquisitor(i, f"Acquisitor-{i}", acquisitions_per_worker, next_id+acquisitions_per_worker*i, API_ENDPOINT, NS)
         acquisitor_threads.append(thread)
 
+    start_time = time.time()
     # Start threads
     for i in range(num_acquisitors):
         acquisitor_threads[i].start()
@@ -174,6 +164,8 @@ def addAcquisitionTest(num_acquisitors, num_tubes):
     # Join threads
     for i in range(num_acquisitors):
         acquisitor_threads[i].join()
+
+    total_elapsed_time = time.time() - start_time
         
     # Print results
     min = acquisitor_threads[0].min
@@ -197,13 +189,67 @@ def addAcquisitionTest(num_acquisitors, num_tubes):
 
         acquisitor_threads[i].printResults()
 
-    print(f"MIN --> {min}")
-    print(f"MIN 5 AVG --> {min5avg/num_acquisitors}")
-    print(f"AVG --> {avg/num_acquisitors}")
-    print(f"MAX --> {max}")
-    print(f"MAX 5 AVG --> {max5avg/num_acquisitors}")
+    with open(filename, 'w') as f:
+        print(f"MIN --> {min}", file=f)
+        print(f"MIN 5 AVG --> {min5avg/num_acquisitors}", file=f)
+        print(f"AVG --> {avg/num_acquisitors}", file=f)
+        print(f"MAX --> {max}", file=f)
+        print(f"MAX 5 AVG --> {max5avg/num_acquisitors}", file=f)
+        print("")
+        print(f"TOTAL ELAPSED TIME --> {total_elapsed_time}", file=f)
 
-def addAnalysisTest(num_analysts, num_acqs):
+def addAutomaticAnalysisTest(filename):
+    # Get num acqs
+    resource_url = f"{API_ENDPOINT}{NS}.Acquisition"
+    r = requests.get(resource_url)
+    num_acqs = len(r.json())
+
+    # Check for next analysis id
+    resource_url = f"{API_ENDPOINT}{NS}.Analysis"
+    r = requests.get(resource_url)
+    next_id = len(r.json()) + 1
+
+    start_time = time.time()
+
+    # Create automatic analyst
+    auto_analyst = AutomaticAnalyst(num_acqs, next_id, API_ENDPOINT, NS)
+
+    total_elapsed_time = time.time() - start_time
+
+    with open(filename, 'w') as f:
+        print(f"MIN --> {auto_analyst.min}", file=f)
+        print(f"MIN 5 AVG --> {auto_analyst.min5avg}", file=f)
+        print(f"AVG --> {auto_analyst.avg}", file=f)
+        print(f"MAX --> {auto_analyst.max}", file=f)
+        print(f"MAX 5 AVG --> {auto_analyst.max5avg}", file=f)
+        print("")
+        print(f"TOTAL ELAPSED TIME --> {total_elapsed_time}", file=f)
+
+def getCalibrations(role):
+    # Check how many calibrations exist
+    resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+    r = requests.get(resource_url)
+    n_calibrations = len(r.json())
+    
+    resource_url = f"{API_ENDPOINT}{NS}.GetCalibration"
+    for i in range(1, n_calibrations+1):
+        #Add calibration i
+        data = {
+            "calId": i,
+            "type": role
+        }
+        r = requests.post(resource_url, data=data)
+        if r.status_code == requests.codes.ok:
+            print(f"Gotten calibration {i}")
+        else:
+            print(f"Error when getting calibration {i}")
+
+def addAnalysisTest(num_analysts, filename):
+    # Get num acqs
+    resource_url = f"{API_ENDPOINT}{NS}.Acquisition"
+    r = requests.get(resource_url)
+    num_acqs = len(r.json())
+
     analyst_threads = []
     analysis_per_worker = int(num_acqs/num_analysts)
     
@@ -214,85 +260,109 @@ def addAnalysisTest(num_analysts, num_acqs):
     
     # Create threads
     for i in range(num_analysts):
+        #PRIMARY ANALYSTS
         thread = Analyst(i, f"Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, API_ENDPOINT, NS)
         analyst_threads.append(thread)
+        #SECONDARY ANALYSTS
+        thread = Analyst(i+num_analysts, f"Analyst-{i+num_analysts}", analysis_per_worker, next_id+num_acqs+analysis_per_worker*i, API_ENDPOINT_2, NS)
+        analyst_threads.append(thread)
         
+    start_time = time.time()
     # Start threads
-    for i in range(num_analysts):
+    for i in range(len(analyst_threads)):
         analyst_threads[i].start()
         
     # Join threads
-    for i in range(num_analysts):
+    for i in range(len(analyst_threads)):
         analyst_threads[i].join()
+
+    total_elapsed_time = time.time() - start_time
         
     # Print results
     min_get = analyst_threads[0].min_get
-    if num_analysts <= 10:
-        min5avg_get = analyst_threads[0].min5avg_get
+    min5avg_get = analyst_threads[0].min5avg_get
     avg_get = analyst_threads[0].avg_get
     max_get = analyst_threads[0].max_get
-    if num_analysts <= 10:
-        max5avg_get = analyst_threads[0].max5avg_get
+    max5avg_get = analyst_threads[0].max5avg_get
     
     min_add = analyst_threads[0].min_add
-    if num_analysts <= 10:
-        min5avg_add = analyst_threads[0].min5avg_add
+    min5avg_add = analyst_threads[0].min5avg_add
     avg_add = analyst_threads[0].avg_add
     max_add = analyst_threads[0].max_add
-    if num_analysts <= 10:
-        max5avg_add = analyst_threads[0].max5avg_add
+    max5avg_add = analyst_threads[0].max5avg_add
     
     analyst_threads[0].printResults()
     for i in range(1, num_analysts):
         if analyst_threads[i].min_get < min_get:
             min_get = analyst_threads[i].min_get
         
-        if num_analysts <= 10:
-            min5avg_get = min5avg_get + analyst_threads[i].min5avg_get
+        min5avg_get = min5avg_get + analyst_threads[i].min5avg_get
 
         avg_get = avg_get + analyst_threads[i].avg_get
 
         if analyst_threads[i].max_get > max_get:
             max_get = analyst_threads[i].max_get
             
-        if num_analysts <= 10:
-            max5avg_get = max5avg_get + analyst_threads[i].max5avg_get
+        max5avg_get = max5avg_get + analyst_threads[i].max5avg_get
             
         if analyst_threads[i].min_add < min_add:
             min_add = analyst_threads[i].min_add
             
-        if num_analysts <= 10:
-            min5avg_add = min5avg_add + analyst_threads[i].min5avg_add
+        min5avg_add = min5avg_add + analyst_threads[i].min5avg_add
             
         avg_add = avg_add + analyst_threads[i].avg_add
         
         if analyst_threads[i].max_get > max_get:
             max_add = analyst_threads[i].max_add
         
-        if num_analysts <= 10:
-            max5avg_add = max5avg_add + analyst_threads[i].max5avg_add
+        max5avg_add = max5avg_add + analyst_threads[i].max5avg_add
 
         analyst_threads[i].printResults()
 
-    print(f"MIN GET ACQ --> {min_get}")
-    if num_analysts <= 10:
-        print(f"MIN 5 GET ACQ --> {min5avg_get/num_analysts}")
-    print(f"AVG GET ACQ --> {avg_get/num_analysts}")
-    print(f"MAX GET ACQ --> {max_get}")
-    if num_analysts <= 10:
-        print(f"MAX 5 GET ACQ --> {max5avg_get/num_analysts}")
-    
-    print(f"MIN ADD ANA --> {min_add}")
-    if num_analysts <= 10:
-        print(f"MIN 5 GET ANA --> {min5avg_add/num_analysts}")
-    print(f"AVG ADD ANA --> {avg_add/num_analysts}")
-    print(f"MAX ADD ANA --> {max_add}")
-    if num_analysts <= 10:
-        print(f"MAX 5 GET ANA --> {max5avg_add/num_analysts}")
+    with open(filename, 'w') as f:
+        print(f"MIN GET ACQ --> {min_get}", file=f)
+        print(f"MIN 5 GET ACQ --> {min5avg_get/num_analysts}", file=f)
+        print(f"AVG GET ACQ --> {avg_get/num_analysts}", file=f)
+        print(f"MAX GET ACQ --> {max_get}", file=f)
+        print(f"MAX 5 GET ACQ --> {max5avg_get/num_analysts}", file=f)
+        print("")
+        
+        print(f"MIN ADD ANA --> {min_add}", file=f)
+        print(f"MIN 5 GET ANA --> {min5avg_add/num_analysts}", file=f)
+        print(f"AVG ADD ANA --> {avg_add/num_analysts}", file=f)
+        print(f"MAX ADD ANA --> {max_add}", file=f)
+        print(f"MAX 5 GET ANA --> {max5avg_add/num_analysts}", file=f)
+        print("")
+
+        print(f"TOTAL ELAPSED TIME --> {total_elapsed_time}", file=f)
 
     print("Add Analysis Test Finalized")
 
-def addResolutionTest(num_analysts, num_acqs):
+def endCalibrations(role):
+    # Check how many calibrations exist
+    resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+    r = requests.get(resource_url)
+    n_calibrations = len(r.json())
+    
+    resource_url = f"{API_ENDPOINT}{NS}.EndCalibration"
+    for i in range(1, n_calibrations+1):
+        #End calibration i
+        data = {
+            "calId": i,
+            "type": role
+        }
+        r = requests.post(resource_url, data=data)
+        if r.status_code == requests.codes.ok:
+            print(f"Ended calibration {i}")
+        else:
+            print(f"Error when ending calibration {i}")
+
+def addResolutionTest(num_analysts, filename):
+    # Get num acqs
+    resource_url = f"{API_ENDPOINT}{NS}.Acquisition"
+    r = requests.get(resource_url)
+    num_acqs = len(r.json())
+
     analyst_threads = []
     analysis_per_worker = int(num_acqs/num_analysts)
     
@@ -306,108 +376,99 @@ def addResolutionTest(num_analysts, num_acqs):
         thread = AdvancedAnalyst(i, f"Advanced Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, API_ENDPOINT, NS)
         analyst_threads.append(thread)
         
+    start_time = time.time()
     # Start threads
-    for i in range(num_analysts):
+    for i in range(len(analyst_threads)):
         analyst_threads[i].start()
         
     # Join threads
-    for i in range(num_analysts):
+    for i in range(len(analyst_threads)):
         analyst_threads[i].join()
+
+    total_elapsed_time = time.time() - start_time
         
     # Print results
     min_get_acq = analyst_threads[0].min_get_acq
-    if num_analysts <= 10:
-        min5avg_get_acq = analyst_threads[0].min5avg_get_acq
+    min5avg_get_acq = analyst_threads[0].min5avg_get_acq
     avg_get_acq = analyst_threads[0].avg_get_acq
     max_get_acq = analyst_threads[0].max_get_acq
-    if num_analysts <= 10:
-        max5avg_get_acq = analyst_threads[0].max5avg_get_acq
+    max5avg_get_acq = analyst_threads[0].max5avg_get_acq
     
     min_get_ana = analyst_threads[0].min_get_ana
-    if num_analysts <= 10:
-        min5avg_get_ana = analyst_threads[0].min5avg_get_ana
+    min5avg_get_ana = analyst_threads[0].min5avg_get_ana
     avg_get_ana = analyst_threads[0].avg_get_ana
     max_get_ana = analyst_threads[0].max_get_ana
-    if num_analysts <= 10:
-        max5avg_get_ana = analyst_threads[0].max5avg_get_ana
+    max5avg_get_ana = analyst_threads[0].max5avg_get_ana
     
     min_add = analyst_threads[0].min_add
-    if num_analysts <= 10:
-        min5avg_add = analyst_threads[0].min5avg_add
+    min5avg_add = analyst_threads[0].min5avg_add
     avg_add = analyst_threads[0].avg_add
     max_add = analyst_threads[0].max_add
-    if num_analysts <= 10:
-        max5avg_add = analyst_threads[0].max5avg_add
+    max5avg_add = analyst_threads[0].max5avg_add
     
     analyst_threads[0].printResults()
     for i in range(1, num_analysts):
         if analyst_threads[i].min_get_acq < min_get_acq:
             min_get_acq = analyst_threads[i].min_get_acq
         
-        if num_analysts <= 10:
-            min5avg_get_acq = min5avg_get_acq + analyst_threads[0].min5avg_get_acq
+        min5avg_get_acq = min5avg_get_acq + analyst_threads[0].min5avg_get_acq
 
         avg_get_acq = avg_get_acq + analyst_threads[i].avg_get_acq
 
         if analyst_threads[i].max_get_acq > max_get_acq:
             max_get_acq = analyst_threads[i].max_get_acq
         
-        if num_analysts <= 10:
-            max5avg_get_acq = max5avg_get_acq + analyst_threads[0].max5avg_get_acq
+        max5avg_get_acq = max5avg_get_acq + analyst_threads[0].max5avg_get_acq
         
         if analyst_threads[i].min_get_ana < min_get_ana:
             min_get_ana = analyst_threads[i].min_get_ana
         
-        if num_analysts <= 10:
-            min5avg_get_ana = min5avg_get_ana + analyst_threads[0].min5avg_get_ana
+        min5avg_get_ana = min5avg_get_ana + analyst_threads[0].min5avg_get_ana
 
         avg_get_ana = avg_get_ana + analyst_threads[i].avg_get_ana
 
         if analyst_threads[i].max_get_ana > max_get_ana:
             max_get_ana = analyst_threads[i].max_get_ana
         
-        if num_analysts <= 10:
-            max5avg_get_ana = max5avg_get_ana + analyst_threads[0].max5avg_get_ana
+        max5avg_get_ana = max5avg_get_ana + analyst_threads[0].max5avg_get_ana
             
         if analyst_threads[i].min_add < min_add:
             min_add = analyst_threads[i].min_add
             
-        if num_analysts <= 10:
-            min5avg_add = min5avg_add + analyst_threads[0].min5avg_add
+        min5avg_add = min5avg_add + analyst_threads[0].min5avg_add
             
         avg_add = avg_add + analyst_threads[i].avg_add
         
         if analyst_threads[i].max_add > max_add:
             max_add = analyst_threads[i].max_add
         
-        if num_analysts <= 10:
-            max5avg_add = max5avg_add + analyst_threads[0].max5avg_add
+        max5avg_add = max5avg_add + analyst_threads[0].max5avg_add
 
         analyst_threads[i].printResults()
 
-    print(f"MIN GET ACQ --> {min_get_acq}")
-    if num_analysts <= 10:
-        print(f"MIN 5 GET ACQ --> {min5avg_get_acq/num_analysts}")
-    print(f"AVG GET ACQ --> {avg_get_acq/num_analysts}")
-    print(f"MAX GET ACQ --> {max_get_acq}")
-    if num_analysts <= 10:
-        print(f"MAX 5 GET ACQ --> {max5avg_get_acq/num_analysts}")
-    
-    print(f"MIN GET ANA --> {min_get_ana}")
-    if num_analysts <= 10:
-        print(f"MIN 5 GET ANA --> {min5avg_get_ana/num_analysts}")
-    print(f"AVG GET ANA --> {avg_get_ana/num_analysts}")
-    print(f"MAX GET ANA --> {max_get_ana}")
-    if num_analysts <= 10:
-        print(f"MAX 5 GET ANA --> {max5avg_get_ana/num_analysts}")
-    
-    print(f"MIN ADD ANA --> {min_add}")
-    if num_analysts <= 10:
-        print(f"MIN 5 ADD ANA --> {min5avg_add/num_analysts}")
-    print(f"AVG ADD ANA --> {avg_add/num_analysts}")
-    print(f"MAX ADD ANA --> {max_add}")
-    if num_analysts <= 10:
-        print(f"MAX 5 ADD ANA --> {max5avg_add/num_analysts}")
+    with open(filename, 'w') as f:
+        print(f"MIN GET ACQ --> {min_get_acq}", file=f)
+        print(f"MIN 5 GET ACQ --> {min5avg_get_acq/num_analysts}", file=f)
+        print(f"AVG GET ACQ --> {avg_get_acq/num_analysts}", file=f)
+        print(f"MAX GET ACQ --> {max_get_acq}", file=f)
+        print(f"MAX 5 GET ACQ --> {max5avg_get_acq/num_analysts}", file=f)
+        print()
+        
+        print(f"MIN GET ANA --> {min_get_ana}", file=f)
+        print(f"MIN 5 GET ANA --> {min5avg_get_ana/num_analysts}", file=f)
+        print(f"AVG GET ANA --> {avg_get_ana/num_analysts}", file=f)
+        print(f"MAX GET ANA --> {max_get_ana}", file=f)
+        print(f"MAX 5 GET ANA --> {max5avg_get_ana/num_analysts}", file=f)
+        print()
+        
+        print(f"MIN ADD ANA --> {min_add}", file=f)
+        print(f"MIN 5 ADD ANA --> {min5avg_add/num_analysts}", file=f)
+        print(f"AVG ADD ANA --> {avg_add/num_analysts}", file=f)
+        print(f"MAX ADD ANA --> {max_add}", file=f)
+        print(f"MAX 5 ADD ANA --> {max5avg_add/num_analysts}", file=f)
+        print()
+
+        print(f"TOTAL ELAPSED TIME --> {total_elapsed_time}", file=f)
 
     print("Add Resolution Test Finalized")
 
@@ -417,13 +478,19 @@ def generateDateTime():
 
     return x2
 
-#cleanMultithreading(10, True, False, 1)
+#cleanMultithreading(50, False, True, 501, 1000)
 #addTubes(250)
 #addWorkAndCalibrations()
-#addAcquisitionTest(1, 500) #Acquisitors, Acquisitions to do
+#addAcquisitionTest(1, 'Acq_3Peers_500tubes_250KB.txt') #Acquisitors, filename to export results
+#addAutomaticAnalysisTest('Auto_3Peers_500tubes_250KB.txt')
 #getCalibrations('PRIMARY')
 #getCalibrations('SECONDARY')
-#addAnalysisTest(10, 500) #Analysts, Analysis to do
+#addAnalysisTest(10, 'Analysis_3Peers_500tubes_250KB_10perRole.txt') #Analysts, filename to export results
+#endCalibrations('PRIMARY')
+#endCalibrations('SECONDARY')
 #getCalibrations('RESOLUTION')
 #addResolutionTest(1, 500)
 
+'''resource_url = f"{API_ENDPOINT}{NS}.Analysis"
+r = requests.get(resource_url)
+print(len(r.json()))'''

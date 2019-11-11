@@ -37,7 +37,7 @@ class Acquisitor(threading.Thread):
 
         for i in range(self.begin, self.begin+self.times):
             # Acquiring
-            time.sleep(random.randint(2, 4)) #GETTING DATA
+            time.sleep(60) #GETTING DATA
 
             # Generating file
             filename = self.generateFilename(i)
@@ -104,7 +104,10 @@ class Acquisitor(threading.Thread):
         tubeId = acqId%100
         if tubeId == 0:
             tubeId = 100
-        calId = int(acqId/25) + 1 #25 is the number of acquisitions per calibration
+        if acqId%25 == 0: #25 is the number of acquisitions per calibration
+            calId = int(acqId/25)
+        else:
+            calId = int(acqId/25) + 1 
         data = {
             "acqId": acqId,
             "acqDate": self.generateDateTime(),

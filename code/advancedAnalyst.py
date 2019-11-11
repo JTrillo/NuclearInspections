@@ -11,6 +11,7 @@ from firebase_admin import storage
 import hashlib
 import os
 import datetime
+import shutil
 
 class AdvancedAnalyst(threading.Thread):
 
@@ -40,6 +41,10 @@ class AdvancedAnalyst(threading.Thread):
         else:
             firebase_admin.initialize_app(cred, name=self.analyst_name)
 
+        #Create analyst folder
+        self.analyst_path = os.path.join(os.getcwd(), self.analyst_name)
+        os.mkdir(analyst_path)
+
         for i in range(self.begin, self.begin+self.times):
             acqId = i%100
             if acqId == 0:
@@ -67,7 +72,7 @@ class AdvancedAnalyst(threading.Thread):
                 # Analyzing
                 if self.DEBUG:
                     print(f"Advanced Analyst-{self.analyst_name} --> Resolving {filename}")
-                time.sleep(random.randint(5, 10)) #ANALYZING
+                time.sleep(20) #ANALYZING
 
                 # Add Resolution
                 resolution = self.addResolution(i)
@@ -76,8 +81,11 @@ class AdvancedAnalyst(threading.Thread):
             else:
                 print(f"HASH NOT VALID {filename}")
 
-        # Delete local file
-        self.deleteLocalFile(filename)
+            # Delete local file
+            self.deleteLocalFile(filename)
+        
+        #Delete analyst folder
+        os.rmdir(self.analyst_path)
 
         time_list.sort()
         self.min_get_acq = min(time_list)
@@ -114,9 +122,10 @@ class AdvancedAnalyst(threading.Thread):
 
         blob = bucket.get_blob(filename)
         blob.download_to_filename(filename)
+        os.rename(os.path.join(os.getcwd(), filename), os.path.join(self.analyst_path, filename))
 
     def checkHashSHA256(self, filename, hashStored):
-        hashValue = self.sha256(filename)
+        hashValue = self.sha256(os.path.join(self.analyst_path, filename))
         return hashValue == hashStored
 
     def sha256(self, fname):
@@ -159,8 +168,8 @@ class AdvancedAnalyst(threading.Thread):
         return elapsed_time
     
     def deleteLocalFile(self, filename):
-        if(os.path.exists(filename)):
-            os.remove(filename)
+        if(os.path.exists(os.path.join(self.analyst_path, filename))):
+            os.remove(os.path.join(self.analyst_path, filename))
         else:
             print(f"File {filename} does not exist")
 
