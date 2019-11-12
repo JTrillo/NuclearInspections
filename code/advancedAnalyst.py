@@ -11,16 +11,16 @@ from firebase_admin import storage
 import hashlib
 import os
 import datetime
-import shutil
 
 class AdvancedAnalyst(threading.Thread):
 
-    def __init__(self, thread_id, analyst_name, times, begin, API_ENDPOINT, NS, DEBUG = False):
+    def __init__(self, thread_id, analyst_name, times, begin, num_acqs, API_ENDPOINT, NS, DEBUG = False):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
         self.analyst_name = analyst_name
         self.times = times
         self.begin = begin
+        self.num_acqs = num_acqs
         self.API_ENDPOINT = API_ENDPOINT
         self.NS = NS
         self.DEBUG = DEBUG
@@ -41,14 +41,10 @@ class AdvancedAnalyst(threading.Thread):
         else:
             firebase_admin.initialize_app(cred, name=self.analyst_name)
 
-        #Create analyst folder
-        self.analyst_path = os.path.join(os.getcwd(), self.analyst_name)
-        os.mkdir(analyst_path)
-
         for i in range(self.begin, self.begin+self.times):
-            acqId = i%100
+            acqId = i%self.num_acqs
             if acqId == 0:
-                acqId = 100
+                acqId = self.num_acqs
             
             # Get Acquisition
             acq = self.getAcquisition(acqId)
@@ -83,9 +79,6 @@ class AdvancedAnalyst(threading.Thread):
 
             # Delete local file
             self.deleteLocalFile(filename)
-        
-        #Delete analyst folder
-        os.rmdir(self.analyst_path)
 
         time_list.sort()
         self.min_get_acq = min(time_list)
@@ -122,10 +115,9 @@ class AdvancedAnalyst(threading.Thread):
 
         blob = bucket.get_blob(filename)
         blob.download_to_filename(filename)
-        os.rename(os.path.join(os.getcwd(), filename), os.path.join(self.analyst_path, filename))
 
     def checkHashSHA256(self, filename, hashStored):
-        hashValue = self.sha256(os.path.join(self.analyst_path, filename))
+        hashValue = self.sha256(filename)
         return hashValue == hashStored
 
     def sha256(self, fname):
@@ -148,9 +140,9 @@ class AdvancedAnalyst(threading.Thread):
 
     def addResolution(self, anaId):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAnalysis"
-        acqId = anaId%100
+        acqId = anaId%self.num_acqs
         if acqId == 0:
-            acqId = 100
+            acqId = self.num_acqs
         possibleOptions = ["Everything OK", "Primary OK", "Secondary OK", "Automatic OK", "Primary & Secondary OK", "Primary & Automatic OK", "Secondary & Automatic OK"]
         data = {
             "analysisId": anaId,
@@ -168,8 +160,8 @@ class AdvancedAnalyst(threading.Thread):
         return elapsed_time
     
     def deleteLocalFile(self, filename):
-        if(os.path.exists(os.path.join(self.analyst_path, filename))):
-            os.remove(os.path.join(self.analyst_path, filename))
+        if(os.path.exists(filename)):
+            os.remove(filename)
         else:
             print(f"File {filename} does not exist")
 

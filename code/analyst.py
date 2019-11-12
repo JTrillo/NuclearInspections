@@ -15,15 +15,20 @@ import shutil
 
 class Analyst(threading.Thread):
 
-    def __init__(self, thread_id, analyst_name, times, begin, API_ENDPOINT, NS, DEBUG = False):
+    def __init__(self, thread_id, analyst_name, times, begin, num_acqs, API_ENDPOINT, NS, DEBUG = False):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
         self.analyst_name = analyst_name
         self.times = times
         self.begin = begin
+        self.num_acqs = num_acqs
         self.API_ENDPOINT = API_ENDPOINT
         self.NS = NS
         self.DEBUG = DEBUG
+
+        #Create analyst folder
+        self.analyst_path = os.path.join(os.getcwd(), self.analyst_name)
+        os.mkdir(self.analyst_path)
 
     def run(self):
         print(f"Analyst {self.analyst_name} has started")
@@ -40,14 +45,10 @@ class Analyst(threading.Thread):
         else:
             firebase_admin.initialize_app(cred, name=self.analyst_name)
 
-        #Create analyst folder
-        self.analyst_path = os.path.join(os.getcwd(), self.analyst_name)
-        os.mkdir(analyst_path)
-
         for i in range(self.begin, self.begin+self.times):
-            acqId = i%100
+            acqId = i%self.num_acqs
             if acqId == 0:
-                acqId = 100
+                acqId = self.num_acqs
             
             # Get Acquisition
             acq = self.getAcquisition(acqId)
@@ -112,8 +113,9 @@ class Analyst(threading.Thread):
         bucket = storage.bucket("hyperledger-jte.appspot.com")
 
         blob = bucket.get_blob(filename)
-        blob.download_to_filename(filename)
-        os.rename(os.path.join(os.getcwd(), filename), os.path.join(self.analyst_path, filename))
+        local_filename = filename.split(".")[0] + f"_{self.analyst_name}.txt"
+        blob.download_to_filename(local_filename)
+        os.rename(os.path.join(os.getcwd(), local_filename), os.path.join(self.analyst_path, filename))
 
     def checkHashSHA256(self, filename, hashStored):
         hashValue = self.sha256(os.path.join(self.analyst_path, filename))
@@ -135,9 +137,9 @@ class Analyst(threading.Thread):
 
     def addAnalysis(self, anaId, tubeLength):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAnalysis"
-        acqId = anaId%100
+        acqId = anaId%self.num_acqs
         if acqId == 0:
-            acqId = 100
+            acqId = self.num_acqs
         data = {
             "analysisId": anaId,
             "analysisDate": self.generateDateTime(),

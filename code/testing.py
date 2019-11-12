@@ -153,7 +153,7 @@ def addAcquisitionTest(num_acquisitors, filename):
 
     # Create threads
     for i in range(num_acquisitors):
-        thread = Acquisitor(i, f"Acquisitor-{i}", acquisitions_per_worker, next_id+acquisitions_per_worker*i, API_ENDPOINT, NS)
+        thread = Acquisitor(i, f"Acquisitor-{i}", acquisitions_per_worker, next_id+acquisitions_per_worker*i, num_tubes, API_ENDPOINT, NS)
         acquisitor_threads.append(thread)
 
     start_time = time.time()
@@ -261,10 +261,10 @@ def addAnalysisTest(num_analysts, filename):
     # Create threads
     for i in range(num_analysts):
         #PRIMARY ANALYSTS
-        thread = Analyst(i, f"Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, API_ENDPOINT, NS)
+        thread = Analyst(i, f"Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, num_acqs, API_ENDPOINT, NS)
         analyst_threads.append(thread)
         #SECONDARY ANALYSTS
-        thread = Analyst(i+num_analysts, f"Analyst-{i+num_analysts}", analysis_per_worker, next_id+num_acqs+analysis_per_worker*i, API_ENDPOINT_2, NS)
+        thread = Analyst(i+num_analysts, f"Analyst-{i+num_analysts}", analysis_per_worker, next_id+num_acqs+analysis_per_worker*i, num_acqs, API_ENDPOINT_2, NS)
         analyst_threads.append(thread)
         
     start_time = time.time()
@@ -373,7 +373,7 @@ def addResolutionTest(num_analysts, filename):
     
     # Create threads
     for i in range(num_analysts):
-        thread = AdvancedAnalyst(i, f"Advanced Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, API_ENDPOINT, NS)
+        thread = AdvancedAnalyst(i, f"Advanced Analyst-{i}", analysis_per_worker, next_id+analysis_per_worker*i, num_acqs, API_ENDPOINT, NS)
         analyst_threads.append(thread)
         
     start_time = time.time()
@@ -478,19 +478,47 @@ def generateDateTime():
 
     return x2
 
-#cleanMultithreading(50, False, True, 501, 1000)
-#addTubes(250)
+#cleanMultithreading(20, True, False, 1, 500)
+addTubes(500)
 #addWorkAndCalibrations()
 #addAcquisitionTest(1, 'Acq_3Peers_500tubes_250KB.txt') #Acquisitors, filename to export results
 #addAutomaticAnalysisTest('Auto_3Peers_500tubes_250KB.txt')
 #getCalibrations('PRIMARY')
 #getCalibrations('SECONDARY')
-#addAnalysisTest(10, 'Analysis_3Peers_500tubes_250KB_10perRole.txt') #Analysts, filename to export results
+#addAnalysisTest(20, 'Analysis_3Peers_500tubes_250KB_20perRole.txt') #Analysts, filename to export results
 #endCalibrations('PRIMARY')
 #endCalibrations('SECONDARY')
 #getCalibrations('RESOLUTION')
-#addResolutionTest(1, 500)
+#addResolutionTest(20, 'Resolution_3Peers_500tubes_250KB_20resolutors.txt') #Advanced analysts, filename to export results
 
-'''resource_url = f"{API_ENDPOINT}{NS}.Analysis"
+resource_url = f"{API_ENDPOINT}{NS}.Tube"
 r = requests.get(resource_url)
-print(len(r.json()))'''
+print(f"Total tubes: {len(r.json())}")
+
+resource_url = f"{API_ENDPOINT}{NS}.Acquisitions"
+r = requests.get(resource_url)
+print(f"Total acquisitions: {len(r.json())}")
+
+resource_url = f"{API_ENDPOINT}{NS}.Analysis"
+r = requests.get(resource_url)
+print(f"Total analysis: {len(r.json())}")
+
+an_fqi = f"resource%3A{NS}.Staff%23auto"
+resource_url = f"{API_ENDPOINT}queries/AnalysisByAnalyst?an_fqi={an_fqi}"
+r = requests.get(resource_url)
+print(f"Num. analysis made by auto: {len(r.json())}")
+
+an_fqi = f"resource%3A{NS}.Staff%23esc"
+resource_url = f"{API_ENDPOINT}queries/AnalysisByAnalyst?an_fqi={an_fqi}"
+r = requests.get(resource_url)
+print(f"Num. analysis made by esc: {len(r.json())}")
+
+an_fqi = f"resource%3A{NS}.Staff%23llopis"
+resource_url = f"{API_ENDPOINT}queries/AnalysisByAnalyst?an_fqi={an_fqi}"
+r = requests.get(resource_url)
+print(f"Num. analysis made by llopis: {len(r.json())}")
+
+an_fqi = f"resource%3A{NS}.Staff%23trillo"
+resource_url = f"{API_ENDPOINT}queries/AnalysisByAnalyst?an_fqi={an_fqi}"
+r = requests.get(resource_url)
+print(f"Num. analysis made by trillo: {len(r.json())}")

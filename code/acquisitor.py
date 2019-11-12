@@ -14,12 +14,13 @@ import datetime
 
 class Acquisitor(threading.Thread):
 
-    def __init__(self, thread_id, acq_name, times, begin, API_ENDPOINT, NS, DEBUG = False):
+    def __init__(self, thread_id, acq_name, times, begin, num_tubes, API_ENDPOINT, NS, DEBUG = False):
         threading.Thread.__init__(self)
         self.thread_id = thread_id
         self.acq_name = acq_name
         self.times = times
         self.begin = begin
+        self.num_tubes = num_tubes
         self.API_ENDPOINT = API_ENDPOINT
         self.NS = NS
         self.DEBUG = DEBUG
@@ -101,9 +102,9 @@ class Acquisitor(threading.Thread):
 
     def addAcquisition(self, acqId, filename, hash_value):
         resource_url = f"{self.API_ENDPOINT}{self.NS}.AddAcquisition"
-        tubeId = acqId%100
+        tubeId = acqId%self.num_tubes
         if tubeId == 0:
-            tubeId = 100
+            tubeId = self.num_tubes
         if acqId%25 == 0: #25 is the number of acquisitions per calibration
             calId = int(acqId/25)
         else:
