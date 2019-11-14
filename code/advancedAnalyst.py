@@ -72,7 +72,8 @@ class AdvancedAnalyst(threading.Thread):
 
                 # Add Resolution
                 resolution = self.addResolution(i)
-                time_list3.append(resolution)
+                if resolution != -1:
+                    time_list3.append(resolution)
 
             else:
                 print(f"HASH NOT VALID {filename}")
@@ -150,9 +151,13 @@ class AdvancedAnalyst(threading.Thread):
             "acqId": acqId,
             "indications": [random.choice(possibleOptions), ""]
         }
-        start_time = time.time()
-        r = requests.post(resource_url, data=data)
-        elapsed_time = time.time() - start_time
+        try:
+            start_time = time.time()
+            r = requests.post(resource_url, data=data)
+            elapsed_time = time.time() - start_time
+        except:
+            print(f"Error when trying to add analysis {anaId}")
+            elapsed_time = -1
         if self.DEBUG:
             print(f"Elapsed time: {elapsed_time}")
             print(f"Response status code: {r.status_code}")

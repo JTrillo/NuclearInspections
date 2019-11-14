@@ -49,7 +49,8 @@ class Acquisitor(threading.Thread):
 
             # Add Acquisition
             elapsedtime = self.addAcquisition(i, filename, hash_value)
-            time_list.append(elapsedtime)
+            if elapsedtime != -1:
+                time_list.append(elapsedtime)
 
             # Uploading file to repository
             self.uploadFileToRepository(filename)
@@ -66,8 +67,10 @@ class Acquisitor(threading.Thread):
 
     def generateFilename(self, acqId):
         if acqId < 10:
-            aux = "00" + str(acqId)
+            aux = "000" + str(acqId)
         elif acqId < 100:
+            aux = "00" + str(acqId)
+        elif acqId < 1000:
             aux = "0" + str(acqId)
         else:
             aux = str(acqId)
@@ -117,9 +120,13 @@ class Acquisitor(threading.Thread):
             "calId": calId,
             "tubeId": tubeId,
         }
-        start_time = time.time()
-        r = requests.post(resource_url, data=data)
-        elapsed_time = time.time() - start_time
+        try:
+            start_time = time.time()
+            r = requests.post(resource_url, data=data)
+            elapsed_time = time.time() - start_time
+        except:
+            print(f"Error when trying to add acquisition {acqId}")
+            elapsed_time = -1
         if self.DEBUG:
             print(f"Elapsed time: {elapsed_time}")
             print(f"Response status code: {r.status_code}")

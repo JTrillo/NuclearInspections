@@ -29,8 +29,10 @@ class AutomaticAnalyst():
         for i in range(self.begin, self.begin+self.times):
             filename = "acq"
             if i < 10:
-                filename = filename + "00" + str(i) + ".txt"
+                filename = filename + "000" + str(i) + ".txt"
             elif i < 100:
+                filename = filename + "00" + str(i) + ".txt"
+            elif i < 1000:
                 filename = filename + "0" + str(i) + ".txt"
             else:
                 filename = filename + str(i) + ".txt"
@@ -43,7 +45,9 @@ class AutomaticAnalyst():
 
             #Send transaction
             elapsed_time = self.addAutomaticAnalysis(i, acqData)
-            time_list.append(elapsed_time)
+            if elapsed_time != -1:
+                time_list.append(elapsed_time)
+                print(f"Analysis {i} added. Elapsed time --> {elapsed_time}")
 
             #Delete local file
             self.deleteLocalFile(filename)
@@ -97,9 +101,13 @@ class AutomaticAnalyst():
             "acqId": acqId,
             "acqData": acqData
         }
-        start_time = time.time()
-        r = requests.post(resource_url, data=data)
-        elapsed_time = time.time() - start_time
+        try:
+            start_time = time.time()
+            r = requests.post(resource_url, data=data)
+            elapsed_time = time.time() - start_time
+        except:
+            print(f"Error when trying to add analysis {analysisId}")
+            elapsed_time = -1
         if DEBUG:
             print(f"Elapsed time: {elapsed_time}")
             print(f"Response status code: {r.status_code}")

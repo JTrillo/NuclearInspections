@@ -102,6 +102,20 @@ def addTubes(n_tubes):
         else:
             print(f"Error when adding tube {i+next_id}")
 
+def cleanCalibrations():
+    # Check how many calibrations exist
+    resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+    r = requests.get(resource_url)
+    num_cals = len(r.json())
+
+    for i in range(num_cals):
+        resource_url = f"{API_ENDPOINT}{NS}.Calibration/{i+1}"
+        r = requests.delete(resource_url)
+        if r.status_code == requests.codes.no_content:
+            print(f"Calibration {i+1} deleted")
+        else:
+            print(f"Error when deleting calibration {i+1}")
+
 def addWorkAndCalibrations():
     #Create work 1
     resource_url = f"{API_ENDPOINT}{NS}.CreateWork"
@@ -478,24 +492,31 @@ def generateDateTime():
 
     return x2
 
-#cleanMultithreading(20, True, False, 1, 500)
-addTubes(500)
+#cleanMultithreading(10, False, True, 1, 2000)
+#addTubes(500)
+#cleanCalibrations()
 #addWorkAndCalibrations()
-#addAcquisitionTest(1, 'Acq_3Peers_500tubes_250KB.txt') #Acquisitors, filename to export results
-#addAutomaticAnalysisTest('Auto_3Peers_500tubes_250KB.txt')
+#addAcquisitionTest(1, 'Acq_3Peers_1000tubes_250KB.txt') #Acquisitors, filename to export results
+#addAutomaticAnalysisTest('Auto_3Peers_1000tubes_250KB.txt')
 #getCalibrations('PRIMARY')
 #getCalibrations('SECONDARY')
-#addAnalysisTest(20, 'Analysis_3Peers_500tubes_250KB_20perRole.txt') #Analysts, filename to export results
+#addAnalysisTest(10, 'Analysis_3Peers_1000tubes_250KB_10perRole.txt') #Analysts, filename to export results
 #endCalibrations('PRIMARY')
 #endCalibrations('SECONDARY')
 #getCalibrations('RESOLUTION')
-#addResolutionTest(20, 'Resolution_3Peers_500tubes_250KB_20resolutors.txt') #Advanced analysts, filename to export results
+#addResolutionTest(20, 'Resolution_3Peers_1000tubes_250KB_10resolutors.txt') #Advanced analysts, filename to export results
+
+print("\r\nNETWORK CURRENT STATE\r\n")
 
 resource_url = f"{API_ENDPOINT}{NS}.Tube"
 r = requests.get(resource_url)
 print(f"Total tubes: {len(r.json())}")
 
-resource_url = f"{API_ENDPOINT}{NS}.Acquisitions"
+resource_url = f"{API_ENDPOINT}{NS}.Calibration"
+r = requests.get(resource_url)
+print(f"Total calibrations: {len(r.json())}")
+
+resource_url = f"{API_ENDPOINT}{NS}.Acquisition"
 r = requests.get(resource_url)
 print(f"Total acquisitions: {len(r.json())}")
 
