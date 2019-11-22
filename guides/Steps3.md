@@ -40,64 +40,12 @@ It necessary to inform other machines' IP addresses in **extra_host** section. N
 | *docker-compose-org3.yml*    | "peer0.org3.example.com", "cli" |
 
 ### 3. Create containers and run them
-These operations are executed through some scripts
+These operations are executed through some scripts previously created.
 
-#### 3.1. Scripts to create containers (called *firstTime.sh*)
-Orderer machine
-```
-#!/bin/bash
+#### 3.1. Modifiy scripts
+In this step you only will have to modify the name of the docker compose file for each machine.
 
-set -ev
-docker-compose -f docker-compose-orderer.yml down -v
-docker-compose -f docker-compose-orderer.yml up -d
-```
-Orgs machines
-```
-#!/bin/bash
-
-set -ev
-docker-compose -f docker-compose-orgn.yml down -v
-docker-compose -f docker-compose-orgn.yml up -d
-```
-
-#### 3.2. Scripts to start containers (called *start.sh*)
-Orderer machine
-```
-#!/bin/bash
-
-set -ev
-docker-compose -f docker-compose-orderer.yml start
-```
-Orgs machines
-```
-#!/bin/bash
-
-set -ev
-docker-compose -f docker-compose-orgn.yml start
-```
-
-#### 3.3. Scripts to stop containers (called *stop.sh*)
-Orderer machine
-```
-#!/bin/bash
-
-set -ev
-docker-compose -f docker-compose-orderer.yml stop
-```
-Orgs machines
-```
-#!/bin/bash
-
-set -ev
-docker-compose -f docker-compose-orgn.yml stop
-```
-
-#### 3.4. Grant user execution permission to those scripts
-```
-chmod u+x firstTime.sh start.sh stop.sh
-```
-
-#### 3.5. Create containers and start them
+#### 3.2. Create containers and start them
 ```
 ./firstTime.sh
 ```
@@ -122,6 +70,7 @@ Org2 Peer Node
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org2.example.com/msp" peer0.org2.example.com peer channel fetch config -o orderer.example.com:7050 -c mychannel
 # Join channel
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org2.example.com/msp" peer0.org2.example.com peer channel join -b mychannel_config.block
+
 ```
 
 Org3 Peer Node
@@ -131,6 +80,7 @@ Org3 Peer Node
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.example.com/msp" peer0.org3.example.com peer channel fetch config -o orderer.example.com:7050 -c mychannel
 # Join channel
 docker exec -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/users/Admin@org3.example.com/msp" peer0.org3.example.com peer channel join -b mychannel_config.block
+
 ```
 
 ### 5. Install business network in all nodes
@@ -142,6 +92,7 @@ mkdir -p /tmp/composer/org1
 mkdir /tmp/composer/org2
 mkdir /tmp/composer/org3
 cp ~/NuclearInspections/connectionProfile-files/connectionProfile-threenet.json /tmp/composer/connectionProfile.json
+
 ```
 * Replace all instances of the text **INSERT_ORDERER_IP** with the IP address of that machine.
 * Replace all instances of the text **INSERT_ORDERER_CA_CERT** with the Orderer CA certificate. Use the following command to get the certificate from the .pem file:
@@ -201,6 +152,7 @@ In Orderer machine for Org1
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/A*.pem /tmp/composer/org1
 # Private Key
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/*_sk /tmp/composer/org1
+
 ```
 
 In Orderer machine for Org2
@@ -209,6 +161,7 @@ In Orderer machine for Org2
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/A*.pem /tmp/composer/org2
 # Private Key
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/*_sk /tmp/composer/org2
+
 ```
 
 In Orderer machine for Org3
@@ -217,6 +170,7 @@ In Orderer machine for Org3
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp/signcerts/A*.pem /tmp/composer/org3
 # Private Key
 cp -p ~/fabric-samples/first-network/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp/keystore/*_sk /tmp/composer/org3
+
 ```
 
 #### 5.4. Create Peer Admin cards for each organization
@@ -273,6 +227,7 @@ For all Orgs machines
 mkdir /tmp/composer
 git clone https://github.com/JTrillo/HyperledgerComposer.git ~/HyperledgerComposer
 composer archive create -t dir -n ~/HyperledgerComposer/nuclear_auto -a /tmp/composer/archive.bna
+
 ```
 
 For Org1 machine
@@ -339,6 +294,7 @@ mkdir /tmp/composer/org1
 mkdir /tmp/composer/org2
 mkdir /tmp/composer/org3
 composer identity request -c PeerAdmin@nuclear-org1 -u admin -s adminpw -d /tmp/composer/org1
+
 ```
 
 Org 2 machine
@@ -346,6 +302,7 @@ Org 2 machine
 mkdir -p /tmp/composer/org2
 composer identity request -c PeerAdmin@nuclear-org2 -u admin -s adminpw -d /tmp/composer/org2
 gcloud compute scp /tmp/composer/org2/admin-pub.pem jokinator20@threenet-1:/tmp/composer/org2
+
 ```
 
 Org 3 machine
@@ -353,6 +310,7 @@ Org 3 machine
 mkdir -p /tmp/composer/org3
 composer identity request -c PeerAdmin@nuclear-org3 -u admin -s adminpw -d /tmp/composer/org3
 gcloud compute scp /tmp/composer/org3/admin-pub.pem jokinator20@threenet-1:/tmp/composer/org3
+
 ```
 
 #### 7.2. Start business network
@@ -374,6 +332,7 @@ Org 1 machine
 composer card create -p /tmp/composer/org1/connectionProfile.json -u admin-org1 -n nuclear_auto -c /tmp/composer/org1/admin-pub.pem -k /tmp/composer/org1/admin-priv.pem -f /tmp/composer/org1/admin-org1@nuclear_auto
 composer card import -f /tmp/composer/org1/admin-org1@nuclear_auto.card -c admin-org1@nuclear_auto
 composer network ping -c admin-org1@nuclear_auto
+
 ```
 
 Org 2 machine
@@ -381,6 +340,7 @@ Org 2 machine
 composer card create -p /tmp/composer/org2/connectionProfile.json -u admin-org2 -n nuclear_auto -c /tmp/composer/org2/admin-pub.pem -k /tmp/composer/org2/admin-priv.pem -f /tmp/composer/org2/admin-org2@nuclear_auto
 composer card import -f /tmp/composer/org2/admin-org2@nuclear_auto.card -c admin-org2@nuclear_auto
 composer network ping -c admin-org2@nuclear_auto
+
 ```
 
 Org 3 machine
@@ -388,10 +348,27 @@ Org 3 machine
 composer card create -p /tmp/composer/org3/connectionProfile.json -u admin-org3 -n nuclear_auto -c /tmp/composer/org3/admin-pub.pem -k /tmp/composer/org3/admin-priv.pem -f /tmp/composer/org3/admin-org3@nuclear_auto
 composer card import -f /tmp/composer/org3/admin-org3@nuclear_auto.card -c admin-org3@nuclear_auto
 composer network ping -c admin-org3@nuclear_auto
+
 ```
 
 ### 8. Interact with the deployed business network
-You can interact with the business network through the REST Server, Composer CLI or Playground.
+To interact with the business network you will need to import participants' cards. There is a script created to do this for you.
+```
+chmod u+x ~/HyperledgerComposer/nuclear_auto/dist/createParticipants.sh
+./HyperledgerComposer/nuclear_auto/dist/createParticipants.sh
+
+```
+
+REST Server must be modified if you want to make request with a big number of parameters.
+```
+# The file you want to modify is located at ~/.nvm/versions/node/YOUR_NODE_VERSION/lib/node_modules/composer-rest-server/server/server.js
+# Line 98. You have to replace the content with this:
+
+        app.middleware('parse', bodyParser.urlencoded({
+            limit: '3mb', extended: true, parameterLimit: 200000
+        }));
+```
+Now you can interact with the business network through the REST Server, Composer CLI or Playground.
 
 ### 9. Upgrade the business network
 

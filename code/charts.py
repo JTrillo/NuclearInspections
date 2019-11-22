@@ -35,7 +35,7 @@ def avgAutoAnalysis(fileSize, threeOrgs):
         yaxis=dict(title=dict(text="Average response time (s)"))
     )
     fig.update_xaxes(range=[500, 1500])
-    fig.update_yaxes(range=[14.0, 15.0])
+    fig.update_yaxes(range=[13.0, 16.0])
     fig.show()
 
 #def avgAnalysis(fileSize, threeOrgs10, threeOrgs20, fiveOrgs10, fiveOrgs20):
