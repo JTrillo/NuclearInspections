@@ -52,8 +52,8 @@ class Acquisitor(threading.Thread):
             if elapsedtime != -1:
                 time_list.append(elapsedtime)
 
-            # Uploading file to repository
-            self.uploadFileToRepository(filename)
+                # Uploading file to repository (only if tx was successfull)
+                self.uploadFileToRepository(filename)
 
             # Deleting local file
             self.deleteLocalFile(filename)

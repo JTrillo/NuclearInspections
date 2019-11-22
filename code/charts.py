@@ -1,65 +1,79 @@
 import plotly.graph_objs as go
 
+NUM_TUBES = [500, 1000, 1500]
 
-def avgAnalysis(threeOrgs, fiveOrgs):
-    try:
-        if len(threeOrgs) != 6 or len(fiveOrgs) != 6:
-            print("Both lists must contain 6 numbers")
-        else:
-            # Number analysts
-            n = [1, 2, 5, 10, 25, 50]
+#def avgAcquisition(fileSize, threeOrgs, fiveOrgs):
+def avgAcquisition(fileSize, threeOrgs):
+    # Number of tubes
+    n = NUM_TUBES
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="3 Orgs net"))
-            fig.add_trace(go.Scatter(x=n, y=fiveOrgs, mode="lines", name="5 Orgs net"))
-            fig.layout = go.Layout(
-                barmode='group',
-                title='Executing transaction \'AddAnalysis\' with different number of analysts',
-                xaxis=dict(title=dict(text="Number of analysts working at same time")),
-                yaxis=dict(title=dict(text="Average response time (s)"))
-            )
-            fig.show()
-    except TypeError:
-        print("Both arguments must be lists containing 6 numbers")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="3 Orgs net"))
+    #fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="5 Orgs net"))
+    fig.layout = go.Layout(
+        barmode='group',
+        title=f"Executing transaction \'AddAcquisition\' with different number of tubes ({fileSize})",
+        xaxis=dict(title=dict(text="Number of tubes")),
+        yaxis=dict(title=dict(text="Average response time (s)"))
+    )
+    fig.update_xaxes(range=[500, 1500])
+    fig.update_yaxes(range=[1.0, 2.0])
+    fig.show()
 
-def avgGetAcquisitions(threeOrgs, fiveOrgs):
-    try:
-        if len(threeOrgs) != 6 or len(fiveOrgs) != 6:
-            print("Both lists must contain 6 numbers")
-        else:
-            # Number analysts
-            n = [1, 2, 5, 10, 25, 50]
+#def avgAutoAnalysis(fileSize, threeOrgs, fiveOrgs):
+def avgAutoAnalysis(fileSize, threeOrgs):
+    # Number of tubes
+    n = NUM_TUBES
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="3 Orgs net"))
-            fig.add_trace(go.Scatter(x=n, y=fiveOrgs, mode="lines", name="5 Orgs net"))
-            fig.layout = go.Layout(
-                barmode='group',
-                title='Retrieving acquisition data with different number of analysts',
-                xaxis=dict(title=dict(text="Number of analysts working at same time")),
-                yaxis=dict(title=dict(text="Average response time (s)"))
-            )
-            fig.show()
-    except TypeError:
-        print("Both arguments must be lists containing 6 numbers")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="3 Orgs net"))
+    #fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="5 Orgs net"))
+    fig.layout = go.Layout(
+        barmode='group',
+        title=f"Executing transaction \'AddAutomaticAnalysis\' with different number of tubes ({fileSize})",
+        xaxis=dict(title=dict(text="Number of tubes")),
+        yaxis=dict(title=dict(text="Average response time (s)"))
+    )
+    fig.update_xaxes(range=[500, 1500])
+    fig.update_yaxes(range=[14.0, 15.0])
+    fig.show()
 
-def avgGetAnalyses(threeOrgs, fiveOrgs):
-    try:
-        if len(threeOrgs) != 6 or len(fiveOrgs) != 6:
-            print("Both lists must contain 6 numbers")
-        else:
-            # Number analysts
-            n = [1, 2, 5, 10, 25, 50]
+#def avgAnalysis(fileSize, threeOrgs10, threeOrgs20, fiveOrgs10, fiveOrgs20):
+def avgAnalysis(fileSize, threeOrgs10, threeOrgs20):
+    # Number of tubes
+    n = NUM_TUBES
 
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=n, y=threeOrgs, mode="lines", name="3 Orgs net"))
-            fig.add_trace(go.Scatter(x=n, y=fiveOrgs, mode="lines", name="5 Orgs net"))
-            fig.layout = go.Layout(
-                barmode='group',
-                title='Retrieving previous analyses data with different number of advanced analysts',
-                xaxis=dict(title=dict(text="Number of advanced analysts working at same time")),
-                yaxis=dict(title=dict(text="Average response time (s)"))
-            )
-            fig.show()
-    except TypeError:
-        print("Both arguments must be lists containing 6 numbers")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs10, mode="lines", name="3 Orgs net (10 analysts per role)"))
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs20, mode="lines", name="3 Orgs net (20 analysts per role)"))
+    #fig.add_trace(go.Scatter(x=n, y=fiveOrgs10, mode="lines", name="5 Orgs net (10 analysts per role)"))
+    #fig.add_trace(go.Scatter(x=n, y=fiveOrgs20, mode="lines", name="5 Orgs net (20 analysts per role)"))
+    fig.layout = go.Layout(
+        barmode='group',
+        title='Executing transaction \'AddAnalysis\' with different number of tubes and different number of analysts',
+        xaxis=dict(title=dict(text="Number of tubes")),
+        yaxis=dict(title=dict(text="Average response time (s)"))
+    )
+    fig.update_xaxes(range=[500, 1500])
+    fig.update_yaxes(range=[1.0, 2.0])
+    fig.show()
+
+#def avgResolution(fileSize, threeOrgs10, threeOrgs20, fiveOrgs10, fiveOrgs20):
+def avgResolution(fileSize, threeOrgs10, threeOrgs20):
+    # Number of tubes
+    n = NUM_TUBES
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs10, mode="lines", name="3 Orgs net (10 advanced analysts)"))
+    fig.add_trace(go.Scatter(x=n, y=threeOrgs20, mode="lines", name="3 Orgs net (20 advanced analysts)"))
+    #fig.add_trace(go.Scatter(x=n, y=fiveOrgs10, mode="lines", name="5 Orgs net (10 advanced analysts)"))
+    #fig.add_trace(go.Scatter(x=n, y=fiveOrgs20, mode="lines", name="5 Orgs net (20 advanced analysts)"))
+    fig.layout = go.Layout(
+        barmode='group',
+        title='Executing transaction \'AddAnalysis\' with different number of tubes and different number of advanced analysts',
+        xaxis=dict(title=dict(text="Number of tubes")),
+        yaxis=dict(title=dict(text="Average response time (s)"))
+    )
+    fig.update_xaxes(range=[500, 1500])
+    fig.update_yaxes(range=[1.0, 2.0])
+    fig.show()
