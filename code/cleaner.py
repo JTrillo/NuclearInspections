@@ -16,9 +16,20 @@ class Cleaner(threading.Thread):
     
     def run(self):
         if self.type == 1:
-            self.cleanAcquisitions()
+            self.cleanTubes()
         elif self.type == 2:
+            self.cleanAcquisitions()
+        elif self.type == 3:
             self.cleanAnalysis()
+
+    def cleanTubes(self):
+        for i in range(self.begin, self.end+1):
+            resource_url = f"{self.API_ENDPOINT}{self.NS}.Tube/{i}"
+            r = requests.delete(resource_url)
+            if r.status_code == requests.codes.no_content:
+                print(f"Tube {i} deleted ({self.threadID})")
+            else:
+                print(f"Error when deleting tube {i} ({self.threadID})")
 
     def cleanAcquisitions(self):
         for i in range(self.begin, self.end+1):
