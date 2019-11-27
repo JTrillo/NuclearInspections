@@ -507,6 +507,7 @@ composer network ping -c admin-org5@nuclear_auto
 To interact with the business network you will need to import participants' cards. There is a script created to do this for you.
 ```
 chmod u+x ~/HyperledgerComposer/nuclear_auto/dist/createParticipants.sh
+cd
 ./HyperledgerComposer/nuclear_auto/dist/createParticipants.sh
 
 ```

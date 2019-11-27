@@ -14,10 +14,10 @@ from advancedAnalyst import *
 from automaticAnalyst import *
 from cleaner import *
 
-#API_ENDPOINT = "http://104.155.2.231:3000/api/" #2 PEERS NET
 API_ENDPOINT = "http://34.76.123.255:3000/api/" #3 PEERS NET
 API_ENDPOINT_2 = "http://34.76.123.255:3001/api/" #3 PEERS NET
-#API_ENDPOINT = "http://35.241.200.124:3000/api/" #5 PEERS NET
+#API_ENDPOINT = "http://34.76.64.220:3000/api/" #5 PEERS NET
+#API_ENDPOINT_2 = "http://34.76.64.220:3001/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 #RUN SERVER WITH CARD ADMIN BEFORE EXECUTE THIS FUNCTION
@@ -64,14 +64,14 @@ def cleanMultithreading(num_threads, tub, acq, ana, begin=-1, totalDeletes=100):
 
             # Create threads
             for i in range(num_threads):
-                thread = Cleaner(f"Thread-{i}", 1+deletes_per_thread*i, deletes_per_thread*(i+1), API_ENDPOINT, NS, 1)
+                thread = Cleaner(f"Thread-{i}", 1+deletes_per_thread*i, deletes_per_thread*(i+1), API_ENDPOINT, NS, 2)
                 threads_acq.append(thread)
         else:
             deletes_per_thread = int(totalDeletes / num_threads)
 
             # Create threads
             for i in range(num_threads):
-                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, begin+deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 1)
+                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, begin+deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 2)
                 threads_acq.append(thread)
 
         # Start threads
@@ -92,14 +92,14 @@ def cleanMultithreading(num_threads, tub, acq, ana, begin=-1, totalDeletes=100):
 
             # Create threads
             for i in range(num_threads):
-                thread = Cleaner(f"Thread-{i}", 1+deletes_per_thread*i, deletes_per_thread*(i+1), API_ENDPOINT, NS, 2)
+                thread = Cleaner(f"Thread-{i}", 1+deletes_per_thread*i, deletes_per_thread*(i+1), API_ENDPOINT, NS, 3)
                 threads_ana.append(thread)
         else:
             deletes_per_thread = int(totalDeletes / num_threads)
 
             # Create threads
             for i in range(num_threads):
-                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, begin+deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 2)
+                thread = Cleaner(f"Thread-{i}", begin+deletes_per_thread*i, begin+deletes_per_thread*(i+1)-1, API_ENDPOINT, NS, 3)
                 threads_ana.append(thread)
 
         # Start threads
@@ -521,19 +521,19 @@ def generateDateTime():
 
     return x2
 
-#cleanMultithreading(10, False, False, True, 1501, 3000) #Primer booleano tubos, segundo adquisiciones y tercero análisis
+#cleanMultithreading(10, False, True, False, 501, 500) #Primer booleano tubos, segundo adquisiciones y tercero análisis
 #addTubes(500)
 #cleanCalibrations()
 #addWorkAndCalibrations()
-#addAcquisitionTest(1, 'Acq_3Peers_1500tubes_250KB_faster.txt') #Acquisitors, filename to export results
-#addAutomaticAnalysisTest('Auto_3Peers_1000tubes_250KB_faster.txt')
+#addAcquisitionTest(1, 'Acq_3Peers_500tubes_500KB_faster.txt') #Acquisitors, filename to export results
+addAutomaticAnalysisTest('Auto_3Peers_500tubes_500KB.txt')
 #getCalibrations('PRIMARY')
 #getCalibrations('SECONDARY')
-#addAnalysisTest(10, 'Analysis_3Peers_1500tubes_250KB_10perRole_faster.txt') #Analysts, filename to export results
+#addAnalysisTest(20, 'Analysis_3Peers_500tubes_500KB_20perRole.txt') #Analysts, filename to export results
 #endCalibrations('PRIMARY')
 #endCalibrations('SECONDARY')
 #getCalibrations('RESOLUTION')
-#addResolutionTest(10, 'Resolution_3Peers_1500tubes_250KB_10resolutors_faster.txt') #Advanced analysts, filename to export results
+#addResolutionTest(10, 'Resolution_3Peers_500tubes_500KB_10resolutors.txt') #Advanced analysts, filename to export results
 
 print("\r\nNETWORK CURRENT STATE\r\n")
 

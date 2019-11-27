@@ -82,8 +82,29 @@ def generateIndications(tubeLength):
 
     return indications
 
+def formatAuto(fname, fout):
+    time_list = []
+    with open(fname, 'r') as f:
+        for x in f:
+            time_list.append(float(x))
+    time_list.sort()
+    minimum = min(time_list)
+    min5avg = sum(time_list[0:5])/5
+    avg = sum(time_list)/len(time_list)
+    maximum = max(time_list)
+    max5avg = sum(time_list[len(time_list)-5:len(time_list)])/5
+
+    with open(fout, 'w') as f:
+        print(f"MIN --> {minimum}", file=f)
+        print(f"MIN 5 AVG --> {min5avg}", file=f)
+        print(f"AVG --> {avg}", file=f)
+        print(f"MAX --> {maximum}", file=f)
+        print(f"MAX 5 AVG --> {max5avg}", file=f)
+        print("")
+
 #upload()
 #download()
 # content = getContent('acq001.txt')
 #print(sha256("acq1.txt"))
 #print(generateIndications(10))
+#formatAuto("format_this.txt", "Auto_5Peers_1500tubes_250KB.txt")
