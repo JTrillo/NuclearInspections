@@ -82,7 +82,7 @@ class Acquisitor(threading.Thread):
         f = open(filename, "w")
 
         content = []
-        n = 40850 # 40850 - 250KB, 81700 - 500KB, 167400 - 1MB
+        n = 122550 # 40850 - 250KB, 81700 - 500KB, 122550 - 750KB, 167400 - 1MB
         for i in range(0, n):
             aux = random.randint(-5000, 5000)
             content.append(aux)

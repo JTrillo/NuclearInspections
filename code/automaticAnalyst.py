@@ -105,8 +105,9 @@ class AutomaticAnalyst():
             start_time = time.time()
             r = requests.post(resource_url, data=data)
             elapsed_time = time.time() - start_time
-        except:
+        except Exception as e:
             print(f"Error when trying to add analysis {analysisId}")
+            print(e)
             elapsed_time = -1
         if DEBUG:
             print(f"Elapsed time: {elapsed_time}")
