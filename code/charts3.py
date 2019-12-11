@@ -9,14 +9,15 @@ def totalAcquisition(threeOrgsFileSizeFixed, fiveOrgsFileSizeFixed, threeOrgsNum
 
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=threeOrgsFileSizeFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgsFileSizeFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=1)
-    fig.update_xaxes(title_text="Number of tubes", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
+    fig.update_xaxes(title_text="Number of tubes (file size 250 KB)", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
     fig.update_yaxes(title_text="Total elapsed time (s)", row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=2)
-    fig.update_xaxes(title_text="Raw data file size (KB)", row=1, col=2, range=[250, 500])
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (num. tubes fixed)"), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (num. tubes fixed)", line=dict(dash='dash')), row=1, col=2)
+    fig.update_xaxes(title_text="Raw data file size (KB, 500 tubes)", row=1, col=2, range=[250, 500])
 
-    fig.layout.update(showlegend=False, width=1000)
+    fig.layout.update(legend=dict(y=-0.2, orientation="h"), width=1000)
+    #fig.layout.update(showlegend=False, width=1000)
 
     config = {'toImageButtonOptions': {
         'filename': f'totalAcq',
@@ -28,14 +29,15 @@ def avgAutoAnalysis(threeOrgsFileSizeFixed, fiveOrgsFileSizeFixed, threeOrgsNumT
     
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=threeOrgsFileSizeFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgsFileSizeFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=1)
-    fig.update_xaxes(title_text="Number of tubes", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
+    fig.update_xaxes(title_text="Number of tubes (file size 250 KB)", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
     fig.update_yaxes(title_text="Average response time (s)", row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=2)
-    fig.update_xaxes(title_text="Raw data file size (KB)", row=1, col=2, range=[250, 500])
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (num. tubes fixed)"), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (num. tubes fixed)", line=dict(dash='dash')), row=1, col=2)
+    fig.update_xaxes(title_text="Raw data file size (KB, 500 tubes)", row=1, col=2, range=[250, 500])
 
-    fig.layout.update(showlegend=False, width=1000)
+    fig.layout.update(legend=dict(y=-0.2, orientation="h"), width=1000)
+    #fig.layout.update(showlegend=False, width=1000)
 
     config = {'toImageButtonOptions': {
         'filename': f'avgAuto',
@@ -47,14 +49,15 @@ def totalAutoAnalysis(threeOrgsFileSizeFixed, fiveOrgsFileSizeFixed, threeOrgsNu
     
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=threeOrgsFileSizeFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgsFileSizeFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=1)
-    fig.update_xaxes(title_text="Number of tubes", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
+    fig.update_xaxes(title_text="Number of tubes (file size 250 KB)", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
     fig.update_yaxes(title_text="Total elapsed time (s)", row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (file size fixed)"), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (file size fixed)", line=dict(dash='dash')), row=1, col=2)
-    fig.update_xaxes(title_text="Raw data file size (KB)", row=1, col=2, range=[250, 500])
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgsNumTubesFixed, mode="lines", name="3 Orgs net (num. tubes fixed)"), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgsNumTubesFixed, mode="lines", name="5 Orgs net (num. tubes fixed)", line=dict(dash='dash')), row=1, col=2)
+    fig.update_xaxes(title_text="Raw data file size (KB, 500 tubes)", row=1, col=2, range=[250, 500])
 
-    fig.layout.update(showlegend=False, width=1000)
+    fig.layout.update(legend=dict(y=-0.2, orientation="h"), width=1000)
+    #fig.layout.update(showlegend=False, width=1000)
 
     config = {'toImageButtonOptions': {
         'filename': f'totalAuto',
@@ -68,16 +71,17 @@ def avgAnalysis(threeOrgs10FileSizeFixed, threeOrgs20FileSizeFixed, fiveOrgs10Fi
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=threeOrgs20FileSizeFixed, mode="lines", name="3 Orgs net 20 analysts per role (file size fixed)", line=dict(dash='dash')), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgs10FileSizeFixed, mode="lines", name="5 Orgs net 10 analysts per role (file size fixed)", line=dict(dash='dot')), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgs20FileSizeFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (file size fixed)"), row=1, col=1)
-    fig.update_xaxes(title_text="Number of tubes", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
+    fig.update_xaxes(title_text="Number of tubes (file size 250 KB)", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
     fig.update_yaxes(title_text="Average response time (s)", row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs10NumTubesFixed, mode="lines", name="3 Orgs net 10 analysts per role (file size fixed)"), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs20NumTubesFixed, mode="lines", name="3 Orgs net 20 analysts per role (file size fixed)", line=dict(dash='dash')), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs10NumTubesFixed, mode="lines", name="5 Orgs net 10 analysts per role (file size fixed)", line=dict(dash='dot')), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs20NumTubesFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (file size fixed)"), row=1, col=2)
-    fig.update_xaxes(title_text="Raw data file size (KB)", row=1, col=2, range=[250, 500])
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs10NumTubesFixed, mode="lines", name="3 Orgs net 10 analysts per role (num. tubes fixed)"), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs20NumTubesFixed, mode="lines", name="3 Orgs net 20 analysts per role (num. tubes fixed)", line=dict(dash='dash')), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs10NumTubesFixed, mode="lines", name="5 Orgs net 10 analysts per role (num. tubes fixed)", line=dict(dash='dot')), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs20NumTubesFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (num. tubes fixed)"), row=1, col=2)
+    fig.update_xaxes(title_text="Raw data file size (KB, 500 tubes)", row=1, col=2, range=[250, 500])
 
-    fig.layout.update(showlegend=False, width=1000)
+    fig.layout.update(legend=dict(y=-0.2, orientation="h"), width=1000)
+    #fig.layout.update(showlegend=False, width=1000)
 
     config = {'toImageButtonOptions': {
         'filename': f'avgAnalysis',
@@ -91,16 +95,17 @@ def totalAnalysis(threeOrgs10FileSizeFixed, threeOrgs20FileSizeFixed, fiveOrgs10
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=threeOrgs20FileSizeFixed, mode="lines", name="3 Orgs net 20 analysts per role (file size fixed)", line=dict(dash='dash')), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgs10FileSizeFixed, mode="lines", name="5 Orgs net 10 analysts per role (file size fixed)", line=dict(dash='dot')), row=1, col=1)
     fig.add_trace(go.Scatter(x=NUM_TUBES, y=fiveOrgs20FileSizeFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (file size fixed)"), row=1, col=1)
-    fig.update_xaxes(title_text="Number of tubes", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
+    fig.update_xaxes(title_text="Number of tubes (file size 250 KB)", row=1, col=1, range=[500, 1500], tick0=500, dtick=250)
     fig.update_yaxes(title_text="Total elapsed time (s)", row=1, col=1)
 
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs10NumTubesFixed, mode="lines", name="3 Orgs net 10 analysts per role (file size fixed)"), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs20NumTubesFixed, mode="lines", name="3 Orgs net 20 analysts per role (file size fixed)", line=dict(dash='dash')), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs10NumTubesFixed, mode="lines", name="5 Orgs net 10 analysts per role (file size fixed)", line=dict(dash='dot')), row=1, col=2)
-    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs20NumTubesFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (file size fixed)"), row=1, col=2)
-    fig.update_xaxes(title_text="Raw data file size (KB)", row=1, col=2, range=[250, 500])
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs10NumTubesFixed, mode="lines", name="3 Orgs net 10 analysts per role (num. tubes fixed)"), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=threeOrgs20NumTubesFixed, mode="lines", name="3 Orgs net 20 analysts per role (num. tubes fixed)", line=dict(dash='dash')), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs10NumTubesFixed, mode="lines", name="5 Orgs net 10 analysts per role (num. tubes fixed)", line=dict(dash='dot')), row=1, col=2)
+    fig.add_trace(go.Scatter(x=FILE_SIZES, y=fiveOrgs20NumTubesFixed, mode="lines+markers", name="5 Orgs net 20 analysts per role (num. tubes fixed)"), row=1, col=2)
+    fig.update_xaxes(title_text="Raw data file size (KB, 500 tubes)", row=1, col=2, range=[250, 500])
 
-    fig.layout.update(showlegend=False, width=1000)
+    fig.layout.update(legend=dict(y=-0.2, orientation="h"), width=1000)
+    #fig.layout.update(showlegend=False, width=1000)
 
     config = {'toImageButtonOptions': {
         'filename': f'totalAnalysis',
