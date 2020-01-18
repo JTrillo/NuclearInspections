@@ -16,8 +16,6 @@ from cleaner import *
 
 API_ENDPOINT = "http://34.76.123.255:3000/api/" #3 PEERS NET
 API_ENDPOINT_2 = "http://34.76.123.255:3001/api/" #3 PEERS NET
-#API_ENDPOINT = "http://34.76.64.220:3000/api/" #5 PEERS NET
-#API_ENDPOINT_2 = "http://34.76.64.220:3001/api/" #5 PEERS NET
 NS = "ertis.uma.nuclear"
 
 #RUN SERVER WITH CARD ADMIN BEFORE EXECUTE THIS FUNCTION
@@ -521,19 +519,19 @@ def generateDateTime():
 
     return x2
 
-#cleanMultithreading(10, False, True, False, 501, 500) #Primer booleano tubos, segundo adquisiciones y tercero análisis
-#addTubes(500)
-#cleanCalibrations()
-#addWorkAndCalibrations()
-#addAcquisitionTest(1, 'Acq_3Peers_500tubes_500KB_faster.txt') #Acquisitors, filename to export results
-addAutomaticAnalysisTest('Auto_3Peers_500tubes_500KB.txt')
-#getCalibrations('PRIMARY')
-#getCalibrations('SECONDARY')
-#addAnalysisTest(20, 'Analysis_3Peers_500tubes_500KB_20perRole.txt') #Analysts, filename to export results
-#endCalibrations('PRIMARY')
-#endCalibrations('SECONDARY')
-#getCalibrations('RESOLUTION')
-#addResolutionTest(10, 'Resolution_3Peers_500tubes_500KB_10resolutors.txt') #Advanced analysts, filename to export results
+#cleanMultithreading(10, False, True, False, 501, 500) #Num. threads, deletes tubes if true, deletes acquisitions if true, deletes analyses if true, id begining, quantity of assets to delete
+#addTubes(500) #Number of tubes to add
+#cleanCalibrations() #Delete all existing calibrations
+#addWorkAndCalibrations() #Add a work and calibrations
+#addAcquisitionTest(1, 'Acq_3Peers_500tubes_500KB_faster.txt') #Num. acquisitors, filename to export results
+#addAutomaticAnalysisTest('Auto_3Peers_500tubes_500KB.txt') #Filename to export results
+#getCalibrations('PRIMARY') #Type of analyst role
+#getCalibrations('SECONDARY') #Type of analyst role
+#addAnalysisTest(20, 'Analysis_3Peers_500tubes_500KB_20perRole.txt') #Num. analysts per role, filename to export results
+#endCalibrations('PRIMARY') #Type of analyst role
+#endCalibrations('SECONDARY') #Type of analyst role
+#getCalibrations('RESOLUTION') #Type of analyst role
+#addResolutionTest(10, 'Resolution_3Peers_500tubes_500KB_10resolutors.txt') #Num. advanced analysts, filename to export results
 
 print("\r\nNETWORK CURRENT STATE\r\n")
 
